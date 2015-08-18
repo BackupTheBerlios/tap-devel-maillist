@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [TAP-devel] Build errors in toolchain
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/tap-devel/2006-March/index.html" >
+   <LINK REL="made" HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Build%20errors%20in%20toolchain&In-Reply-To=%3C750d52ca0603170247q13e0127aq%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000060.html">
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[TAP-devel] Build errors in toolchain</H1>
+    <B>Simon Capewell</B> 
+    <A HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Build%20errors%20in%20toolchain&In-Reply-To=%3C750d52ca0603170247q13e0127aq%40mail.gmail.com%3E"
+       TITLE="[TAP-devel] Build errors in toolchain">simon.capewell at gmail.com
+       </A><BR>
+    <I>Fri Mar 17 11:47:46 CET 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000060.html">[TAP-devel] Build errors in toolchain
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#61">[ date ]</a>
+              <a href="thread.html#61">[ thread ]</a>
+              <a href="subject.html#61">[ subject ]</a>
+              <a href="author.html#61">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Mark,
+
+Sorry to hear you're having trouble. I'm afraid I can offer little help with
+your toolchain problems. I had enough trouble getting the correct bits of
+Cygwin up and running! Given the small number of people actively
+contributing to Berlios, documentation has unfortunately not been a
+priority. I'd hope that in this absence some of the TAPs might serve as a
+starting point for new development. However, if they don't build we're going
+to need a little help from you to sort it out. Obviously people wouldn't put
+unbuildable code into svn on purpose so all the issues are likely to be due
+to Windows v. Unix. Us Windows users just don't have any way of testing for
+Unix compatibility unless someone knows otherwise. Do you have a list of the
+TAPs that don't build and which files are causing problems? I've found
+makefiles are like stepping back into the dark ages after using development
+environments to manage builds for 11 years!
+
+Simon
+
+
+On 16/03/06, Mark Blakeney &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/tap-devel">markb at berlios.de</A>&gt; wrote:
+&gt;<i>
+</I>&gt;<i> On Thursday 16 March 2006 18:10, you wrote:
+</I>&gt;<i> &gt; didn't see this sort of problem when I built the toolchain for c++,
+</I>&gt;<i> &gt; but mine is on Cygwin. I'm a bit suspicious that you've got a mixup
+</I>&gt;<i> &gt; going on with your native toolchain (in /usr/bin) being used to
+</I>&gt;<i> &gt; compile for MIPS, when actually your newly built tap toolchain should
+</I>&gt;<i> &gt; be doing that. I presume you're running debian on x86, so I'm not
+</I>&gt;<i> &gt; surprised that /usr/bin/ld can't cope with elf32-bigmips.
+</I>&gt;<i>
+</I>&gt;<i> You mean a self-inflicted mixup? I just download the toolchain and type
+</I>&gt;<i> make don't I? I haven't changed anything. The problem will likely be an
+</I>&gt;<i> environment issue between my recent Debian (x86) and what the toolchain
+</I>&gt;<i> expects and certainly cygwin will be quite different (in versions at
+</I>&gt;<i> least) to my environment.
+</I>&gt;<i>
+</I>&gt;<i> &gt; Try building one of the test taps from berlios and see if your
+</I>&gt;<i> &gt; toolchain is actually OK. The binaries should have been built to
+</I>&gt;<i> &gt; /usr/local/topfield-gcc.
+</I>&gt;<i>
+</I>&gt;<i> I already did some successfully so (I think?) my toolchain will build
+</I>&gt;<i> all taps ok. However, I was looking for complete confidence by seeing
+</I>&gt;<i> the toolchain make complete properly and the formal tap tests succeed. I
+</I>&gt;<i> guess I will give up on this but a bug in the toolchain build does
+</I>&gt;<i> exist.
+</I>&gt;<i>
+</I>&gt;<i> BTW, regarding the svn tree. The make only succeeds for 8 of the 12 taps
+</I>&gt;<i> and only libutils amongst the 6 libs. However, the errors are mostly due
+</I>&gt;<i> to mistakes in the Makefiles, filename case errors, dos file names (e.g.
+</I>&gt;<i> include .\tapstring), missing files, and plenty of other errors I can't
+</I>&gt;<i> determine. Most of the source files have very odd line terminations (not
+</I>&gt;<i> just a unix/dos issue), e.g. CRLF + LF (but not consistently in the same
+</I>&gt;<i> file?). Do nearly all of the contributors here work on Windows and what
+</I>&gt;<i> editors are they using? There are also directories in the libs area with
+</I>&gt;<i> plenty of source files but no explanation of what the lib does or how to
+</I>&gt;<i> build or use it.
+</I>&gt;<i>
+</I>&gt;<i> Please don't take this comment harshly because this facility is a good
+</I>&gt;<i> idea and has great potential. Clearly a number of people have gone to
+</I>&gt;<i> enormous effort to set up and contribute to this community effort. These
+</I>&gt;<i> (minor?) issues do make it onerous for a newbie however.
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> Mark Blakeney.
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> TAP-devel mailing list
+</I>&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/tap-devel">TAP-devel at lists.berlios.de</A>
+</I>&gt;<i> <A HREF="http://lists.berlios.de/mailman/listinfo/tap-devel">http://lists.berlios.de/mailman/listinfo/tap-devel</A>
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="https://lists.berlios.de/pipermail/tap-devel/attachments/20060317/a7771cf9/attachment.html">https://lists.berlios.de/pipermail/tap-devel/attachments/20060317/a7771cf9/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000060.html">[TAP-devel] Build errors in toolchain
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#61">[ date ]</a>
+              <a href="thread.html#61">[ thread ]</a>
+              <a href="subject.html#61">[ subject ]</a>
+              <a href="author.html#61">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/tap-devel">More information about the TAP-devel
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,835 @@
+From robin_tap at rattus.homelinux.com  Sun Dec  4 22:07:42 2005
+From: robin_tap at rattus.homelinux.com (Robin Glover)
+Date: Sun, 04 Dec 2005 21:07:42 +0000
+Subject: [TAP-devel] C++ - fixing v-table problems
+Message-ID: <43935A9E.5040907@rattus.homelinux.com>
+
+I have successfully made virtual function calls work on the topfield by 
+fixing up the v-tables of each class with virtual functions using the 
+following code. The problem seems to be that the function pointers 
+inside the v-table are not being adjusted for the tap base address when 
+the tap loads into memory. The code performs this adjustment, and should 
+be called for each class with virtual functions, probably at the start 
+of your TAP_Main.
+
+Note that you still have to provide custom operator new & delete for 
+each class. There seems to be a broken global operator new inside 
+libtap.a which prevents you from simply defining global implementations. 
+I also have to add -fno-weak to the g++ command line to avoid every 
+single class member call from crashing the topfield due to double 
+counting the address offset of the call destination from the tap base 
+address.
+
+Robin
+
+
+struct vtableItem
+{
+    unsigned short offs1;
+    unsigned short offs2;
+    unsigned long fnPtr;
+};
+
+struct vtable
+{
+    vtableItem preamble;
+    vtableItem items[];
+};
+
+template <typename T> void FixupVTable()
+{
+    T object;
+    char* objPtr = (char*) &object;
+    objPtr += sizeof(T) - 4; // the pointer to the v-table seems to be 
+at the end of the object
+
+    vtable* pVtable = *((vtable**)objPtr);
+
+    // preamble has always been zero (so far), so if it doesn't look 
+right, we give up
+    if (pVtable->preamble.offs1 != 0)
+        return;
+
+    if (pVtable->preamble.offs2 != 0)
+        return;
+
+    if (pVtable->preamble.fnPtr != 0)
+        return;
+
+    for (int i=0; i<1000; i++) // can increase if you have > 1000 
+virtual functions!
+    {
+        vtableItem& item = pVtable->items[i];
+        if (item.fnPtr > 0x200000 ) // a 2mb tap? no, surely not. This 
+pointer probably already adjusted
+            continue;
+
+        if (item.fnPtr == 0) // the compiler inserts 8 bytes of 0's at 
+end of vtable - when we hit that we can stop
+            break; // that's all folks
+
+        item.fnPtr += _tap_startAddr;
+    }
+}
+
+
+
+
+
+From simon.capewell at gmail.com  Sun Dec  4 22:21:47 2005
+From: simon.capewell at gmail.com (Simon Capewell)
+Date: Sun, 04 Dec 2005 21:21:47 +0000
+Subject: [TAP-devel] C++ - fixing v-table problems
+In-Reply-To: <43935A9E.5040907@rattus.homelinux.com>
+References: <43935A9E.5040907@rattus.homelinux.com>
+Message-ID: <43935DEB.2030602@gmail.com>
+
+Good news, although it's a shame Topfield didn't get the TAP loader code 
+correct. It's exactly as I suspected. You should see the code inside 
+TAP_Osd_PutGD which is a function within libtap.a rather than a call 
+directly into the firmware. It adds _tap_startaddr to the 
+TAP_GrData.data pointer. Yeuch!
+
+Perhaps we could do a fixed libtap.a either without the global new and 
+delete or with ones that work. There is a disassembled libtap.a lurking 
+in the toppy.org.uk downloads section somewhere. It may even be compilable.
+
+
+Robin Glover wrote:
+> I have successfully made virtual function calls work on the topfield by 
+> fixing up the v-tables of each class with virtual functions using the 
+> following code. The problem seems to be that the function pointers 
+> inside the v-table are not being adjusted for the tap base address when 
+> the tap loads into memory. The code performs this adjustment, and should 
+> be called for each class with virtual functions, probably at the start 
+> of your TAP_Main.
+> 
+> Note that you still have to provide custom operator new & delete for 
+> each class. There seems to be a broken global operator new inside 
+> libtap.a which prevents you from simply defining global implementations. 
+> I also have to add -fno-weak to the g++ command line to avoid every 
+> single class member call from crashing the topfield due to double 
+> counting the address offset of the call destination from the tap base 
+> address.
+> 
+> Robin
+> 
+> 
+> struct vtableItem
+> {
+>    unsigned short offs1;
+>    unsigned short offs2;
+>    unsigned long fnPtr;
+> };
+> 
+> struct vtable
+> {
+>    vtableItem preamble;
+>    vtableItem items[];
+> };
+> 
+> template <typename T> void FixupVTable()
+> {
+>    T object;
+>    char* objPtr = (char*) &object;
+>    objPtr += sizeof(T) - 4; // the pointer to the v-table seems to be at 
+> the end of the object
+> 
+>    vtable* pVtable = *((vtable**)objPtr);
+> 
+>    // preamble has always been zero (so far), so if it doesn't look 
+> right, we give up
+>    if (pVtable->preamble.offs1 != 0)
+>        return;
+> 
+>    if (pVtable->preamble.offs2 != 0)
+>        return;
+> 
+>    if (pVtable->preamble.fnPtr != 0)
+>        return;
+> 
+>    for (int i=0; i<1000; i++) // can increase if you have > 1000 virtual 
+> functions!
+>    {
+>        vtableItem& item = pVtable->items[i];
+>        if (item.fnPtr > 0x200000 ) // a 2mb tap? no, surely not. This 
+> pointer probably already adjusted
+>            continue;
+> 
+>        if (item.fnPtr == 0) // the compiler inserts 8 bytes of 0's at 
+> end of vtable - when we hit that we can stop
+>            break; // that's all folks
+> 
+>        item.fnPtr += _tap_startAddr;
+>    }
+> }
+> 
+> 
+> 
+> _______________________________________________
+> TAP-devel mailing list
+> TAP-devel at lists.berlios.de
+> http://lists.berlios.de/mailman/listinfo/tap-devel
+> 
+
+
+From simon.capewell at gmail.com  Mon Dec  5 00:24:15 2005
+From: simon.capewell at gmail.com (Simon Capewell)
+Date: Sun, 04 Dec 2005 23:24:15 +0000
+Subject: [TAP-devel] C++ - fixing v-table problems
+In-Reply-To: <43935A9E.5040907@rattus.homelinux.com>
+References: <43935A9E.5040907@rattus.homelinux.com>
+Message-ID: <43937A9F.1080205@gmail.com>
+
+I wonder if there is any way to get the vtables into the .xdata section 
+so they get fixed up automatically? I don't know enough about gcc to 
+know if this is either feasible or desirable.
+
+
+Robin Glover wrote:
+> I have successfully made virtual function calls work on the topfield by 
+> fixing up the v-tables of each class with virtual functions using the 
+> following code. The problem seems to be that the function pointers 
+> inside the v-table are not being adjusted for the tap base address when 
+> the tap loads into memory. The code performs this adjustment, and should 
+> be called for each class with virtual functions, probably at the start 
+> of your TAP_Main.
+> 
+> Note that you still have to provide custom operator new & delete for 
+> each class. There seems to be a broken global operator new inside 
+> libtap.a which prevents you from simply defining global implementations. 
+> I also have to add -fno-weak to the g++ command line to avoid every 
+> single class member call from crashing the topfield due to double 
+> counting the address offset of the call destination from the tap base 
+> address.
+> 
+> Robin
+> 
+> 
+> struct vtableItem
+> {
+>    unsigned short offs1;
+>    unsigned short offs2;
+>    unsigned long fnPtr;
+> };
+> 
+> struct vtable
+> {
+>    vtableItem preamble;
+>    vtableItem items[];
+> };
+> 
+> template <typename T> void FixupVTable()
+> {
+>    T object;
+>    char* objPtr = (char*) &object;
+>    objPtr += sizeof(T) - 4; // the pointer to the v-table seems to be at 
+> the end of the object
+> 
+>    vtable* pVtable = *((vtable**)objPtr);
+> 
+>    // preamble has always been zero (so far), so if it doesn't look 
+> right, we give up
+>    if (pVtable->preamble.offs1 != 0)
+>        return;
+> 
+>    if (pVtable->preamble.offs2 != 0)
+>        return;
+> 
+>    if (pVtable->preamble.fnPtr != 0)
+>        return;
+> 
+>    for (int i=0; i<1000; i++) // can increase if you have > 1000 virtual 
+> functions!
+>    {
+>        vtableItem& item = pVtable->items[i];
+>        if (item.fnPtr > 0x200000 ) // a 2mb tap? no, surely not. This 
+> pointer probably already adjusted
+>            continue;
+> 
+>        if (item.fnPtr == 0) // the compiler inserts 8 bytes of 0's at 
+> end of vtable - when we hit that we can stop
+>            break; // that's all folks
+> 
+>        item.fnPtr += _tap_startAddr;
+>    }
+> }
+> 
+> 
+> 
+> _______________________________________________
+> TAP-devel mailing list
+> TAP-devel at lists.berlios.de
+> http://lists.berlios.de/mailman/listinfo/tap-devel
+> 
+
+
+From j_de_angelis at hotmail.com  Mon Dec  5 08:34:32 2005
+From: j_de_angelis at hotmail.com (John De Angelis)
+Date: Mon, 05 Dec 2005 18:34:32 +1100
+Subject: [TAP-devel] C++ - fixing v-table problems
+In-Reply-To: <43937A9F.1080205@gmail.com>
+Message-ID: <BAY107-F2612AEA07D0482D8405280DF410@phx.gbl>
+
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/tap-devel/attachments/20051205/20951826/attachment.html>
+
+From robin_tap at rattus.homelinux.com  Tue Dec  6 22:20:56 2005
+From: robin_tap at rattus.homelinux.com (Robin Glover)
+Date: Tue, 06 Dec 2005 21:20:56 +0000
+Subject: [TAP-devel] C++ - fixing v-table problems
+In-Reply-To: <43935A9E.5040907@rattus.homelinux.com>
+References: <43935A9E.5040907@rattus.homelinux.com>
+Message-ID: <439600B8.5070902@rattus.homelinux.com>
+
+Just for the record you can create a version of libtap.a with the broken
+__builtin_new removed fairly easily - extract init.o from libtap.a, use
+mips-objcopy -N __builtin_new init.o newinit.o to create a copy of the
+object file with the offending symbol removed, rename back and re-create
+the archive (not forgetting to ranlib).
+
+It's then possible to define a set of global new/delete operators which
+work rather than having to define them on a class-by-class basis. You
+could even put a .o with them in into libtap.o, I suppose.
+
+I think that pretty much means that the basic c++ features can be made
+to work - no idea whether things like multiple/virtual inheritance work
+yet, or pointers to member functions, but mostly you can get away
+without needing that sort of stuff. It's certainly better than C (he
+says  :-)  ). One last note is that constructors of static or global
+objects do not get called at tap startup (and destructors presumably
+don't get called at exit either).
+
+Robin
+
+
+
+Robin Glover wrote:
+
+> I have successfully made virtual function calls work on the topfield
+> by fixing up the v-tables of each class with virtual functions using
+> the following code. The problem seems to be that the function pointers
+> inside the v-table are not being adjusted for the tap base address
+> when the tap loads into memory. The code performs this adjustment, and
+> should be called for each class with virtual functions, probably at
+> the start of your TAP_Main.
+>
+> Note that you still have to provide custom operator new & delete for
+> each class. There seems to be a broken global operator new inside
+> libtap.a which prevents you from simply defining global
+> implementations. I also have to add -fno-weak to the g++ command line
+> to avoid every single class member call from crashing the topfield due
+> to double counting the address offset of the call destination from the
+> tap base address.
+>
+> Robin
+>
+>
+> struct vtableItem
+> {
+>    unsigned short offs1;
+>    unsigned short offs2;
+>    unsigned long fnPtr;
+> };
+>
+> struct vtable
+> {
+>    vtableItem preamble;
+>    vtableItem items[];
+> };
+>
+> template <typename T> void FixupVTable()
+> {
+>    T object;
+>    char* objPtr = (char*) &object;
+>    objPtr += sizeof(T) - 4; // the pointer to the v-table seems to be
+> at the end of the object
+>
+>    vtable* pVtable = *((vtable**)objPtr);
+>
+>    // preamble has always been zero (so far), so if it doesn't look
+> right, we give up
+>    if (pVtable->preamble.offs1 != 0)
+>        return;
+>
+>    if (pVtable->preamble.offs2 != 0)
+>        return;
+>
+>    if (pVtable->preamble.fnPtr != 0)
+>        return;
+>
+>    for (int i=0; i<1000; i++) // can increase if you have > 1000
+> virtual functions!
+>    {
+>        vtableItem& item = pVtable->items[i];
+>        if (item.fnPtr > 0x200000 ) // a 2mb tap? no, surely not. This
+> pointer probably already adjusted
+>            continue;
+>
+>        if (item.fnPtr == 0) // the compiler inserts 8 bytes of 0's at
+> end of vtable - when we hit that we can stop
+>            break; // that's all folks
+>
+>        item.fnPtr += _tap_startAddr;
+>    }
+> }
+>
+>
+>
+> _______________________________________________
+> TAP-devel mailing list
+> TAP-devel at lists.berlios.de
+> http://lists.berlios.de/mailman/listinfo/tap-devel
+
+
+
+From simon.capewell at gmail.com  Tue Dec  6 23:17:34 2005
+From: simon.capewell at gmail.com (Simon Capewell)
+Date: Tue, 06 Dec 2005 22:17:34 +0000
+Subject: [TAP-devel] C++ - fixing v-table problems
+In-Reply-To: <439600B8.5070902@rattus.homelinux.com>
+References: <43935A9E.5040907@rattus.homelinux.com> <439600B8.5070902@rattus.homelinux.com>
+Message-ID: <43960DFE.4030301@gmail.com>
+
+What's stopping you then? ;-)
+
+Anyone got any thoughts on what a C++ framework might contain apart from 
+the obvious
+
+class Tapplication
+{
+virtual dword OnIdle();
+virtual dword OnKey(dword key, dword hardwareKey);
+virtual dword On...
+};
+
+and
+class MessageBox
+{
+Show(const char* message);
+};
+
+
+
+
+Robin Glover wrote:
+> Just for the record you can create a version of libtap.a with the broken
+> __builtin_new removed fairly easily - extract init.o from libtap.a, use
+> mips-objcopy -N __builtin_new init.o newinit.o to create a copy of the
+> object file with the offending symbol removed, rename back and re-create
+> the archive (not forgetting to ranlib).
+> 
+> It's then possible to define a set of global new/delete operators which
+> work rather than having to define them on a class-by-class basis. You
+> could even put a .o with them in into libtap.o, I suppose.
+> 
+> I think that pretty much means that the basic c++ features can be made
+> to work - no idea whether things like multiple/virtual inheritance work
+> yet, or pointers to member functions, but mostly you can get away
+> without needing that sort of stuff. It's certainly better than C (he
+> says  :-)  ). One last note is that constructors of static or global
+> objects do not get called at tap startup (and destructors presumably
+> don't get called at exit either).
+> 
+> Robin
+
+
+
+From simon.capewell at gmail.com  Fri Dec  9 00:40:28 2005
+From: simon.capewell at gmail.com (Simon Capewell)
+Date: Thu, 8 Dec 2005 23:40:28 +0000
+Subject: [TAP-devel] File releases
+In-Reply-To: <43855EB4.1030705@urbanec.net>
+References: <43855EB4.1030705@urbanec.net>
+Message-ID: <750d52ca0512081540g34386687i@mail.gmail.com>
+
+After an initial hiccup of forgetting the version number on the files (
+MakeGraphics.zip can be discarded), I've uploaded MakeGraphics 1.0 for
+Win32. MakeGraphics_1.0.zip and MakeGraphics_src_1.0.zip.
+
+If anyone non Windows would like to make this cross platform I'm sure it'd
+be very easy. There's very little Windows specific code beyond the wildcard
+matching and the FreeImage library that it uses is cross platform.
+
+Simon
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/tap-devel/attachments/20051208/de4e0662/attachment.html>
+
+From simon.capewell at gmail.com  Fri Dec  9 02:01:18 2005
+From: simon.capewell at gmail.com (Simon Capewell)
+Date: Fri, 09 Dec 2005 01:01:18 +0000
+Subject: [TAP-devel] Tagging in svn
+Message-ID: <4398D75E.8090105@gmail.com>
+
+Can someone enlighten me on how to create a tag for MakeGraphics please? 
+Do I need to manually create the hosts/Win32 directory in tags?
+
+Simon
+
+
+
+From berlios at urbanec.net  Fri Dec  9 06:05:20 2005
+From: berlios at urbanec.net (Peter Urbanec)
+Date: Fri, 09 Dec 2005 16:05:20 +1100
+Subject: [TAP-devel] File releases
+In-Reply-To: <750d52ca0512081540g34386687i@mail.gmail.com>
+References: <43855EB4.1030705@urbanec.net> <750d52ca0512081540g34386687i@mail.gmail.com>
+Message-ID: <43991090.2080404@urbanec.net>
+
+Simon Capewell wrote:
+
+> After an initial hiccup of forgetting the version number on the files 
+> (MakeGraphics.zip can be discarded), I've uploaded MakeGraphics 1.0 
+> for Win32. MakeGraphics_1.0.zip and MakeGraphics_src_1.0.zip.
+
+
+Package added and files released.
+
+You may wish to put together a "press release" announcing the utility 
+and explaining it's purpose and post this to the TAP-announce list. It 
+can also go on the News section of the TAP project web site.
+
+
+> If anyone non Windows would like to make this cross platform I'm sure 
+> it'd be very easy. There's very little Windows specific code beyond 
+> the wildcard matching and the FreeImage library that it uses is cross 
+> platform. 
+
+
+Sounds good. I don't have time to port this, but perhaps someone else 
+will have a go.
+
+
+From berlios at urbanec.net  Fri Dec  9 06:19:14 2005
+From: berlios at urbanec.net (Peter Urbanec)
+Date: Fri, 09 Dec 2005 16:19:14 +1100
+Subject: [TAP-devel] Tagging in svn
+In-Reply-To: <4398D75E.8090105@gmail.com>
+References: <4398D75E.8090105@gmail.com>
+Message-ID: <439913D2.1040301@urbanec.net>
+
+Simon Capewell wrote:
+
+> Can someone enlighten me on how to create a tag for MakeGraphics 
+> please? Do I need to manually create the hosts/Win32 directory in tags?
+
+
+Something like this should take the current trunk version and create a 
+1.0 tag:
+
+svn copy 
+svn+ssh://svn.berlios.de/svnroot/repos/tap/trunk/host/Win32/MakeGraphics 
+svn+ssh://svn.berlios.de/svnroot/repos/tap/tags/host/Win32/MakeGraphics-1.0 
+-m "Tag release 1.0"
+
+You should also edit the file trunk/release_tags to document the tag.
+
+
+From simon.capewell at gmail.com  Fri Dec  9 12:19:19 2005
+From: simon.capewell at gmail.com (Simon Capewell)
+Date: Fri, 9 Dec 2005 11:19:19 +0000
+Subject: [TAP-devel] Tagging in svn
+In-Reply-To: <439913D2.1040301@urbanec.net>
+References: <4398D75E.8090105@gmail.com> <439913D2.1040301@urbanec.net>
+Message-ID: <750d52ca0512090319j7f10f8fbu@mail.gmail.com>
+
+Hmm, that's pretty much what I tried. It failed and complained about
+tags/host/Win32 not existing.
+
+On 09/12/05, Peter Urbanec <berlios at urbanec.net> wrote:
+>
+> Simon Capewell wrote:
+>
+> > Can someone enlighten me on how to create a tag for MakeGraphics
+> > please? Do I need to manually create the hosts/Win32 directory in tags?
+>
+>
+> Something like this should take the current trunk version and create a
+> 1.0 tag:
+>
+> svn copy
+> svn+ssh://svn.berlios.de/svnroot/repos/tap/trunk/host/Win32/MakeGraphics
+> svn+ssh://svn.berlios.de/svnroot/repos/tap/tags/host/Win32/MakeGraphics-
+> 1.0
+> -m "Tag release 1.0"
+>
+> You should also edit the file trunk/release_tags to document the tag.
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/tap-devel/attachments/20051209/037befe0/attachment.html>
+
+From berlios at urbanec.net  Fri Dec  9 12:32:24 2005
+From: berlios at urbanec.net (Peter Urbanec)
+Date: Fri, 09 Dec 2005 22:32:24 +1100
+Subject: [TAP-devel] Tagging in svn
+In-Reply-To: <750d52ca0512090319j7f10f8fbu@mail.gmail.com>
+References: <4398D75E.8090105@gmail.com> <439913D2.1040301@urbanec.net> <750d52ca0512090319j7f10f8fbu@mail.gmail.com>
+Message-ID: <43996B48.2010508@urbanec.net>
+
+Simon Capewell wrote:
+
+> Hmm, that's pretty much what I tried. It failed and complained about 
+> tags/host/Win32 not existing.
+
+
+OK, I'll tag it for you and post the exact command(s) I used.
+
+
+From berlios at urbanec.net  Fri Dec  9 13:01:49 2005
+From: berlios at urbanec.net (Peter Urbanec)
+Date: Fri, 09 Dec 2005 23:01:49 +1100
+Subject: [TAP-devel] Tagging in svn
+In-Reply-To: <43996B48.2010508@urbanec.net>
+References: <4398D75E.8090105@gmail.com> <439913D2.1040301@urbanec.net> <750d52ca0512090319j7f10f8fbu@mail.gmail.com> <43996B48.2010508@urbanec.net>
+Message-ID: <4399722D.2060309@urbanec.net>
+
+Peter Urbanec wrote:
+
+> OK, I'll tag it for you and post the exact command(s) I used.
+
+
+It turns out that SVN ended up being less co-operative than expected. 
+Here's what I did:
+
+$ svn mkdir svn+ssh://svn.berlios.de/svnroot/repos/tap/tags/host -m "Tag 
+release 1.0 of MakeGraphics"
+$ svn mkdir svn+ssh://svn.berlios.de/svnroot/repos/tap/tags/host/Win32 
+-m "Tag release 1.0 of MakeGraphics"
+$ svn copy 
+svn+ssh://svn.berlios.de/svnroot/repos/tap/trunk/host/Win32/MakeGraphics 
+svn+ssh://svn.berlios.de/svnroot/repos/tap/tags/host/Win32/MakeGraphics-1.0 
+-m "Tag release 1.0 of MakeGraphics"
+
+Notice how SVN has to be told to create each directory level.
+
+
+
+From robin_tap at rattus.homelinux.com  Thu Dec 15 22:42:42 2005
+From: robin_tap at rattus.homelinux.com (Robin Glover)
+Date: Thu, 15 Dec 2005 21:42:42 +0000
+Subject: [TAP-devel] Changes to libutils for emulator compile
+Message-ID: <43A1E352.7030109@rattus.homelinux.com>
+
+Does anyone object to me making some changes to libutils to allow it to
+compile under MS VC++ for ease of use when running an emulator? The
+changes should have no effect on functionality when compiled under gcc.
+The MS compiler doesn't allow pointer arithmetic on void* (gcc treats as
+char*), nor does it allow the construct used in do_div in vsprintf.c to
+be used as an array index.
+
+I'd also like to update the headers to put in 'extern "C"' for c++
+compiles to avoid problems with name mangling in consumers of the
+library but not in the library compile itself.
+
+cheers,
+
+Robin
+
+
+From j_de_angelis at hotmail.com  Fri Dec 16 01:24:57 2005
+From: j_de_angelis at hotmail.com (John De Angelis)
+Date: Fri, 16 Dec 2005 11:24:57 +1100
+Subject: [TAP-devel] Changes to libutils for emulator compile
+In-Reply-To: <43A1E352.7030109@rattus.homelinux.com>
+Message-ID: <BAY107-F175F79749C290C533F21F0DF3A0@phx.gbl>
+
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/tap-devel/attachments/20051216/b5b6dc19/attachment.html>
+
+From simon.capewell at gmail.com  Sun Dec 18 00:03:32 2005
+From: simon.capewell at gmail.com (Simon Capewell)
+Date: Sat, 17 Dec 2005 23:03:32 +0000
+Subject: [TAP-devel] Detecting emulation at compile time
+Message-ID: <43A49944.4010502@gmail.com>
+
+Since we now have a Toppy emulator that runs under Windows there's a 
+need for certain code to #ifdef'ed out on the non Toppy platform, which 
+we're currently doing #ifdef WIN32. Obviously this macro wouldn't be 
+defined if you ever happen to develop a Mac or Linux based emulator, so 
+I'd like to add a target macro for the Toppy itself. Possible names are
+TOPPY
+TOPFIELD
+MIPS
+
+Anyone got any preferences or other suggestions?
+
+Simon
+
+
+From j_de_angelis at hotmail.com  Sun Dec 18 00:25:42 2005
+From: j_de_angelis at hotmail.com (John De Angelis)
+Date: Sun, 18 Dec 2005 10:25:42 +1100
+Subject: [TAP-devel] Detecting emulation at compile time
+In-Reply-To: <43A49944.4010502@gmail.com>
+Message-ID: <BAY107-F46D07252AD1731D92CC98DF3D0@phx.gbl>
+
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/tap-devel/attachments/20051218/47bebb79/attachment.html>
+
+From simon.capewell at gmail.com  Sun Dec 18 00:27:19 2005
+From: simon.capewell at gmail.com (Simon Capewell)
+Date: Sat, 17 Dec 2005 23:27:19 +0000
+Subject: [TAP-devel] Detecting emulation at compile time
+In-Reply-To: <BAY107-F46D07252AD1731D92CC98DF3D0@phx.gbl>
+References: <BAY107-F46D07252AD1731D92CC98DF3D0@phx.gbl>
+Message-ID: <43A49ED7.1030100@gmail.com>
+
+_TAP would be fine by me, particularly if it's already in use.
+
+John De Angelis wrote:
+> Simon, I'm currently using _TAP but it could be easily replaced to 
+> whatever is selected. TOPFIELD would get my vote (if not TAP :))
+> 
+> cheers,
+> 
+> John
+> 
+>     ------------------------------------------------------------------------
+>     From:  /Simon Capewell <simon.capewell at gmail.com>/
+>     To:  /tap-devel at lists.berlios.de/
+>     Subject:  /[TAP-devel] Detecting emulation at compile time/
+>     Date:  /Sat, 17 Dec 2005 23:03:32 +0000/
+>      >Since we now have a Toppy emulator that runs under Windows there's a
+>      >need for certain code to #ifdef'ed out on the non Toppy platform,
+>      >which we're currently doing #ifdef WIN32. Obviously this macro
+>      >wouldn't be defined if you ever happen to develop a Mac or Linux
+>      >based emulator, so I'd like to add a target macro for the Toppy
+>      >itself. Possible names are
+>      >TOPPY
+>      >TOPFIELD
+>      >MIPS
+>      >
+>      >Anyone got any preferences or other suggestions?
+>      >
+>      >Simon
+>      >_______________________________________________
+>      >TAP-devel mailing list
+>      >TAP-devel at lists.berlios.de
+>      >http://lists.berlios.de/mailman/listinfo/tap-devel
+
+
+From berlios at urbanec.net  Mon Dec 19 06:33:54 2005
+From: berlios at urbanec.net (Peter Urbanec)
+Date: Mon, 19 Dec 2005 16:33:54 +1100
+Subject: [TAP-devel] Detecting emulation at compile time
+In-Reply-To: <43A49944.4010502@gmail.com>
+References: <43A49944.4010502@gmail.com>
+Message-ID: <43A64642.5070402@urbanec.net>
+
+Simon Capewell wrote:
+
+> TOPPY
+> TOPFIELD
+> MIPS
+>
+> Anyone got any preferences or other suggestions?
+
+
+MIPS is not good, that matches a CPU architecture. The other 
+alternatives are not so great, since they match a company, rather than a 
+particular API. _TAP isn't descriptive enough either, since that could 
+refer to the older PPC TF4000 TAP API.
+
+For those reasons, I propose that we standardise on TFxxxx series of names:
+
+TF5x00 - Any TF5x00 series PVR.
+TF5000 - TF5000 PVR.
+TF5000MP - Masterpiece.
+TF5800 - TF5800 PVR.
+TF5600 - The new wireless box.
+TF6000 - The next gen wireless box.
+
+So, for example, for my existing TF5000PVRt, the defined values would be 
+TF5x00 and TF5000. If I was targeting a Masterpiece, the values would be 
+TF5x00, TF5000 and TF5000MP.
+
+I also propose that we support the various API revisions by the use of 
+TAP_API, for example:
+
+#if(TAP_API == 1.22)
+
+Would it make sense to also distinguish between IP, satellite, cable and 
+terrestrial boxes?
+
+
+
+From j_de_angelis at hotmail.com  Mon Dec 19 22:09:21 2005
+From: j_de_angelis at hotmail.com (John De Angelis)
+Date: Tue, 20 Dec 2005 08:09:21 +1100
+Subject: [TAP-devel] Detecting emulation at compile time
+In-Reply-To: <43A64642.5070402@urbanec.net>
+Message-ID: <BAY107-F162443CA31FCADA3E288C7DF3F0@phx.gbl>
+
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/tap-devel/attachments/20051220/10b988d9/attachment.html>
+
+From berlios at urbanec.net  Tue Dec 20 02:33:50 2005
+From: berlios at urbanec.net (Peter Urbanec)
+Date: Tue, 20 Dec 2005 12:33:50 +1100
+Subject: [TAP-devel] Detecting emulation at compile time
+In-Reply-To: <750d52ca0512190336w35c9a4b2t@mail.gmail.com>
+References: <43A49944.4010502@gmail.com> <43A64642.5070402@urbanec.net> <750d52ca0512190336w35c9a4b2t@mail.gmail.com>
+Message-ID: <43A75F7E.1040104@urbanec.net>
+
+Simon Capewell wrote:
+
+> however none address the current need which is detecting whether I am 
+> compiling for the target platform (Toppy) or an emulated development 
+> platform (win32/mac/linux)? Perhaps I'm thinking back to front and 
+> should have a general EMULATOR or TAPULATOR define with any additional 
+> host specific code handled with WIN32 etc.
+
+
+Well, the Toppy is the default platform, so all code should be able to
+assume that it is being cross-compiled from an arbitrary host to a
+Topfield target. Anything that is "emulator" specific needs to be the
+special case. To achieve that, I think the most appropriate action is
+for the "emulator" to standardise a set of preprocessor symbols to
+identify itself.
+
+For example, the emulator specific include files should do something
+like this:
+
+#define TAP_EMULATOR SLARTIBARFAST
+#define TAP_EMULATOR_PLATFORM WIN32
+#define TAP_EMULATOR_VERSION 35
+
+Then the code can then check if the target is an emulator, which
+platform is being targeted, which version of the emulator and even which
+emulator, if there are multiple choices.
+
+It will have to be done as part of the emulator installation, because
+it's very unlikely that you can find a set of existing predefined
+compiler symbols that will be both readable and work reliably on a lot
+of platforms.
+
+One easy way is for the emulator environment to rename tap.h to
+tap.h.orig and put in a wrapper tap.h, which defines the above
+preprocessor values. The tap.h.orig file can then be #included in the
+wrapper tap.h so that there is no need to change the Topfield provided
+files.
+
+
+
+
+From simon.capewell at gmail.com  Tue Dec 20 16:25:47 2005
+From: simon.capewell at gmail.com (Simon Capewell)
+Date: Tue, 20 Dec 2005 15:25:47 +0000
+Subject: [TAP-devel] TAP_SystemProc
+Message-ID: <750d52ca0512200725h1cc811d3m@mail.gmail.com>
+
+Is calling calling TAP_SystemProc from within TAP_EventHandler a bad thing?
+Topfield advise against it, presumably to stop a TAP getting stuck in an
+infinite loop. With the correct guards in place in TAP_EventHandler this
+won't happen and it will allow an MFC style DoModal function for popup
+windows.
+
+Does anyone have any experience of this or words of dire warning?
+
+Simon
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/tap-devel/attachments/20051220/6a9290f8/attachment.html>
+

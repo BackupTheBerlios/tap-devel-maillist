@@ -1,0 +1,266 @@
+From markb at berlios.de  Thu Mar 16 01:46:28 2006
+From: markb at berlios.de (Mark Blakeney)
+Date: Thu, 16 Mar 2006 10:46:28 +1000
+Subject: [TAP-devel] Build errors in toolchain
+Message-ID: <200603161046.29180.markb@users.berlios.de>
+
+Hi,
+
+I'm new to TAP development and have just joined this list.
+
+I have tried to build the TAP toolchain but get errors and I am hoping
+somebody here can help me. I am building the toolchain because I would
+like to start experimenting with tap development but use C++ (I've read
+all the appropriate posts here). However, the built-up toolchain
+downloadable from the site has not been made with the
+enable-languages=c,c++ option in the Makefile (although I see simonc
+added it to the svn copy on 21-Dec-05).
+
+I use a current Debian sid distribution which uses gcc v4.0.3 as the
+default. One problem I immediately encountered were various compile
+errors which I found were due to the toolchain requiring gcc v3. The
+Makefile should probably specify this (or add the appropriate options on
+gcc v4).
+
+After this, the toolchain seems to build but fails in the taptest build
+with the following:
+
+Building taptest
+make -C taptest
+make[1]: Entering directory 
+`/home/mark/Data/toppy/berlios/svn/trunk/tools/toolchain/taptest'
+gcc-3.4 -nostartfiles -T /usr/local/topfield-gcc/mips/lib/tap.ld  
+-Wl,-Map,menulibc.map -o menulibc.elf menulibc.o 
+-L/usr/local/topfield-gcc/topfield-sdk/lib -ltap -lc -lm
+/usr/bin/ld: target elf32-bigmips not found
+collect2: ld returned 1 exit status
+make[1]: *** [menulibc.elf] Error 1
+make[1]: Leaving directory 
+`/home/mark/Data/toppy/berlios/svn/trunk/tools/toolchain/taptest'
+make: *** [taptest/.built] Error 2
+
+I have tried various hacks to overcome this without success. I think
+that the target should now be something like elf32-tradbigmips
+(traditional big mips)?
+
+Does anybody know what the problem is? (note I get the same error if I
+build the toolchain source download rather than the svn tree).
+
+Regards,
+
+-- 
+Mark Blakeney.
+
+
+
+
+From robin_tap at rattus.homelinux.com  Thu Mar 16 09:10:04 2006
+From: robin_tap at rattus.homelinux.com (Robin Glover)
+Date: Thu, 16 Mar 2006 08:10:04 +0000
+Subject: [TAP-devel] Build errors in toolchain
+In-Reply-To: <200603161046.29180.markb@users.berlios.de>
+References: <200603161046.29180.markb@users.berlios.de>
+Message-ID: <44191D5C.7080208@rattus.homelinux.com>
+
+Hi Mark,
+
+didn't see this sort of problem when I built the toolchain for c++, but
+mine is on Cygwin. I'm a bit suspicious that you've got a mixup going on
+with your native toolchain (in /usr/bin) being used to compile for MIPS,
+when actually your newly built tap toolchain should be doing that. I
+presume you're running debian on x86, so I'm not surprised that
+/usr/bin/ld can't cope with elf32-bigmips.
+
+Try building one of the test taps from berlios and see if your toolchain
+is actually OK. The binaries should have been built to
+/usr/local/topfield-gcc.
+
+Glad to hear that you're going to try c++ - keep us updated as to how
+it's all going.
+
+Robin
+
+Mark Blakeney wrote:
+> Hi,
+>
+> I'm new to TAP development and have just joined this list.
+>
+> I have tried to build the TAP toolchain but get errors and I am hoping
+> somebody here can help me. I am building the toolchain because I would
+> like to start experimenting with tap development but use C++ (I've read
+> all the appropriate posts here). However, the built-up toolchain
+> downloadable from the site has not been made with the
+> enable-languages=c,c++ option in the Makefile (although I see simonc
+> added it to the svn copy on 21-Dec-05).
+>
+> I use a current Debian sid distribution which uses gcc v4.0.3 as the
+> default. One problem I immediately encountered were various compile
+> errors which I found were due to the toolchain requiring gcc v3. The
+> Makefile should probably specify this (or add the appropriate options on
+> gcc v4).
+>
+> After this, the toolchain seems to build but fails in the taptest build
+> with the following:
+>
+> Building taptest
+> make -C taptest
+> make[1]: Entering directory 
+> `/home/mark/Data/toppy/berlios/svn/trunk/tools/toolchain/taptest'
+> gcc-3.4 -nostartfiles -T /usr/local/topfield-gcc/mips/lib/tap.ld  
+> -Wl,-Map,menulibc.map -o menulibc.elf menulibc.o 
+> -L/usr/local/topfield-gcc/topfield-sdk/lib -ltap -lc -lm
+> /usr/bin/ld: target elf32-bigmips not found
+> collect2: ld returned 1 exit status
+> make[1]: *** [menulibc.elf] Error 1
+> make[1]: Leaving directory 
+> `/home/mark/Data/toppy/berlios/svn/trunk/tools/toolchain/taptest'
+> make: *** [taptest/.built] Error 2
+>
+> I have tried various hacks to overcome this without success. I think
+> that the target should now be something like elf32-tradbigmips
+> (traditional big mips)?
+>
+> Does anybody know what the problem is? (note I get the same error if I
+> build the toolchain source download rather than the svn tree).
+>
+> Regards,
+>
+>   
+
+
+From markb at berlios.de  Thu Mar 16 14:53:25 2006
+From: markb at berlios.de (Mark Blakeney)
+Date: Thu, 16 Mar 2006 23:53:25 +1000
+Subject: [TAP-devel] Build errors in toolchain
+In-Reply-To: <44191D5C.7080208@rattus.homelinux.com>
+References: <200603161046.29180.markb@users.berlios.de> <44191D5C.7080208@rattus.homelinux.com>
+Message-ID: <200603162353.25940.markb@users.berlios.de>
+
+On Thursday 16 March 2006 18:10, you wrote:
+> didn't see this sort of problem when I built the toolchain for c++,
+> but mine is on Cygwin. I'm a bit suspicious that you've got a mixup
+> going on with your native toolchain (in /usr/bin) being used to
+> compile for MIPS, when actually your newly built tap toolchain should
+> be doing that. I presume you're running debian on x86, so I'm not
+> surprised that /usr/bin/ld can't cope with elf32-bigmips.
+
+You mean a self-inflicted mixup? I just download the toolchain and type
+make don't I? I haven't changed anything. The problem will likely be an
+environment issue between my recent Debian (x86) and what the toolchain
+expects and certainly cygwin will be quite different (in versions at
+least) to my environment.
+
+> Try building one of the test taps from berlios and see if your
+> toolchain is actually OK. The binaries should have been built to
+> /usr/local/topfield-gcc.
+
+I already did some successfully so (I think?) my toolchain will build
+all taps ok. However, I was looking for complete confidence by seeing
+the toolchain make complete properly and the formal tap tests succeed. I
+guess I will give up on this but a bug in the toolchain build does
+exist.
+
+BTW, regarding the svn tree. The make only succeeds for 8 of the 12 taps
+and only libutils amongst the 6 libs. However, the errors are mostly due
+to mistakes in the Makefiles, filename case errors, dos file names (e.g.
+include .\tapstring), missing files, and plenty of other errors I can't
+determine. Most of the source files have very odd line terminations (not
+just a unix/dos issue), e.g. CRLF + LF (but not consistently in the same
+file?). Do nearly all of the contributors here work on Windows and what
+editors are they using? There are also directories in the libs area with
+plenty of source files but no explanation of what the lib does or how to
+build or use it.
+
+Please don't take this comment harshly because this facility is a good
+idea and has great potential. Clearly a number of people have gone to
+enormous effort to set up and contribute to this community effort. These
+(minor?) issues do make it onerous for a newbie however.
+
+-- 
+Mark Blakeney.
+
+
+
+From simon.capewell at gmail.com  Fri Mar 17 11:47:46 2006
+From: simon.capewell at gmail.com (Simon Capewell)
+Date: Fri, 17 Mar 2006 10:47:46 +0000
+Subject: [TAP-devel] Build errors in toolchain
+In-Reply-To: <200603162353.25940.markb@users.berlios.de>
+References: <200603161046.29180.markb@users.berlios.de>
+	 <44191D5C.7080208@rattus.homelinux.com>
+	 <200603162353.25940.markb@users.berlios.de>
+Message-ID: <750d52ca0603170247q13e0127aq@mail.gmail.com>
+
+Hi Mark,
+
+Sorry to hear you're having trouble. I'm afraid I can offer little help with
+your toolchain problems. I had enough trouble getting the correct bits of
+Cygwin up and running! Given the small number of people actively
+contributing to Berlios, documentation has unfortunately not been a
+priority. I'd hope that in this absence some of the TAPs might serve as a
+starting point for new development. However, if they don't build we're going
+to need a little help from you to sort it out. Obviously people wouldn't put
+unbuildable code into svn on purpose so all the issues are likely to be due
+to Windows v. Unix. Us Windows users just don't have any way of testing for
+Unix compatibility unless someone knows otherwise. Do you have a list of the
+TAPs that don't build and which files are causing problems? I've found
+makefiles are like stepping back into the dark ages after using development
+environments to manage builds for 11 years!
+
+Simon
+
+
+On 16/03/06, Mark Blakeney <markb at berlios.de> wrote:
+>
+> On Thursday 16 March 2006 18:10, you wrote:
+> > didn't see this sort of problem when I built the toolchain for c++,
+> > but mine is on Cygwin. I'm a bit suspicious that you've got a mixup
+> > going on with your native toolchain (in /usr/bin) being used to
+> > compile for MIPS, when actually your newly built tap toolchain should
+> > be doing that. I presume you're running debian on x86, so I'm not
+> > surprised that /usr/bin/ld can't cope with elf32-bigmips.
+>
+> You mean a self-inflicted mixup? I just download the toolchain and type
+> make don't I? I haven't changed anything. The problem will likely be an
+> environment issue between my recent Debian (x86) and what the toolchain
+> expects and certainly cygwin will be quite different (in versions at
+> least) to my environment.
+>
+> > Try building one of the test taps from berlios and see if your
+> > toolchain is actually OK. The binaries should have been built to
+> > /usr/local/topfield-gcc.
+>
+> I already did some successfully so (I think?) my toolchain will build
+> all taps ok. However, I was looking for complete confidence by seeing
+> the toolchain make complete properly and the formal tap tests succeed. I
+> guess I will give up on this but a bug in the toolchain build does
+> exist.
+>
+> BTW, regarding the svn tree. The make only succeeds for 8 of the 12 taps
+> and only libutils amongst the 6 libs. However, the errors are mostly due
+> to mistakes in the Makefiles, filename case errors, dos file names (e.g.
+> include .\tapstring), missing files, and plenty of other errors I can't
+> determine. Most of the source files have very odd line terminations (not
+> just a unix/dos issue), e.g. CRLF + LF (but not consistently in the same
+> file?). Do nearly all of the contributors here work on Windows and what
+> editors are they using? There are also directories in the libs area with
+> plenty of source files but no explanation of what the lib does or how to
+> build or use it.
+>
+> Please don't take this comment harshly because this facility is a good
+> idea and has great potential. Clearly a number of people have gone to
+> enormous effort to set up and contribute to this community effort. These
+> (minor?) issues do make it onerous for a newbie however.
+>
+> --
+> Mark Blakeney.
+>
+> _______________________________________________
+> TAP-devel mailing list
+> TAP-devel at lists.berlios.de
+> http://lists.berlios.de/mailman/listinfo/tap-devel
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/tap-devel/attachments/20060317/a7771cf9/attachment.html>
+

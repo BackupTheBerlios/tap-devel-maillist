@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [TAP-devel] Initialisation of pointers in global variables
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/tap-devel/2006-February/index.html" >
+   <LINK REL="made" HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Initialisation%20of%20pointers%20in%20global%20variables&In-Reply-To=%3C43F87AA0.6040301%40rattus.homelinux.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000055.html">
+   <LINK REL="Next"  HREF="000057.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[TAP-devel] Initialisation of pointers in global variables</H1>
+    <B>Robin Glover</B> 
+    <A HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Initialisation%20of%20pointers%20in%20global%20variables&In-Reply-To=%3C43F87AA0.6040301%40rattus.homelinux.com%3E"
+       TITLE="[TAP-devel] Initialisation of pointers in global variables">robin_tap at rattus.homelinux.com
+       </A><BR>
+    <I>Sun Feb 19 15:03:12 CET 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000055.html">[TAP-devel] Initialisation of pointers in global variables
+</A></li>
+        <LI>Next message: <A HREF="000057.html">[TAP-devel] C++ taps - support for virtual functions on templates
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#56">[ date ]</a>
+              <a href="thread.html#56">[ thread ]</a>
+              <a href="subject.html#56">[ subject ]</a>
+              <a href="author.html#56">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Daniel,
+
+no, unfortunately there is no relocation information in the tap file. If
+you have a look at how the makefile works for building a tap, the last
+step is to do 'mips-objdump -o binary name.elf name.tap'. This step just
+forms a memory image of what the tap code would look like if it was
+loaded into memory at a base address of (I think) zero. All relocation
+information is discarded at this point.
+
+Of course I suppose you *could* try to write a tap that would act as a
+dynamic loader/relocater for other taps, but I imagine that it'd be more
+trouble than it was worth ;-)
+
+Robin
+
+Dani&#235;l te Winkel wrote:
+&gt;<i> Hi Robin,
+</I>&gt;<i>
+</I>&gt;<i> Thanks for your clear answer.
+</I>&gt;<i>
+</I>&gt;<i> Maybe a different route is possible? Can one postfix the global pointers
+</I>&gt;<i> based on the relocation and section info present in the tapfile itself,
+</I>&gt;<i> after the tap is loaded into memory. This asuming that one knows which tap
+</I>&gt;<i> is actually loaded, and for now ignoring the time added to the app's
+</I>&gt;<i> start-up)?
+</I>&gt;<i> Is would save the developer from prefixing or postfixing variables with a
+</I>&gt;<i> possible errors of forgetting or mistyping. It also may cover more areas in
+</I>&gt;<i> one go, such as the C++ vtables and pointers in C/C++ global variables.
+</I>&gt;<i>
+</I>&gt;<i> Dani&#235;l
+</I>&gt;<i>
+</I>&gt;<i> -----Oorspronkelijk bericht-----
+</I>&gt;<i> Van: Robin Glover [mailto:<A HREF="https://lists.berlios.de/mailman/listinfo/tap-devel">robin_tap at rattus.homelinux.com</A>]
+</I>&gt;<i> Verzonden: zaterdag 18 februari 2006 21:47
+</I>&gt;<i> Aan: Dani&#235;l te Winkel
+</I>&gt;<i> CC: <A HREF="https://lists.berlios.de/mailman/listinfo/tap-devel">tap-devel at lists.berlios.de</A>
+</I>&gt;<i> Onderwerp: Re: [TAP-devel] Initialisation of pointers in global
+</I>&gt;<i> variables
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Hi Daniel,
+</I>&gt;<i>
+</I>&gt;<i> as you suggest it's a problem with the TAP loader on the toppy, which
+</I>&gt;<i> has no capability for proper relocation of the code. Most of the time it
+</I>&gt;<i> gets away with this due to the fact that the MIPS assembler is tweaked
+</I>&gt;<i> to use a relative addressing mode, so it doesn't matter where in memory
+</I>&gt;<i> the TAP is put because the offset between the instruction accessing the
+</I>&gt;<i> global data and the data itself is the same. In the case of pointers
+</I>&gt;<i> such as the example you give (or the function pointers in a c++ classes
+</I>&gt;<i> vtable) it doesn't work, since the assembly loads what it thinks is the
+</I>&gt;<i> address of the data or function from the variable, ends up with
+</I>&gt;<i> something pointing to near the beginning of memory space rather than in
+</I>&gt;<i> the body of the tap and dereferences/calls that. Reboot...
+</I>&gt;<i>
+</I>&gt;<i> For c++ we get around this by having code that adds _tap_base_address to
+</I>&gt;<i> each function pointer in the vtable of each class when the tap is
+</I>&gt;<i> loaded. This can be automated since you can dump the symbols in the .elf
+</I>&gt;<i> file and find the vtables (start with _vt$). Much harder for
+</I>&gt;<i> data/function pointer arrays - I suppose you could append _fixme to the
+</I>&gt;<i> name of each variable that needed fixing, so that you could find them in
+</I>&gt;<i> the name dump. Have a look at tap++.mk in the libc++utils folder (on
+</I>&gt;<i> berlios) to see how it's done for vtable function pointers.
+</I>&gt;<i>
+</I>&gt;<i> Robin
+</I>&gt;<i>
+</I>&gt;<i> Dani&#235;l te Winkel wrote:
+</I>&gt;<i>   
+</I>&gt;&gt;<i> Hi guys,
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> In the manual for the TAP API 1.22, on page 12 and 13, Topfield say:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Static initialized variables of the function pointer or the variable
+</I>&gt;&gt;<i>     
+</I>&gt;<i> pointer
+</I>&gt;<i>   
+</I>&gt;&gt;<i> cannot be permitted due to complier BUG.
+</I>&gt;&gt;<i> For example, the below pArray will not be initialize.
+</I>&gt;&gt;<i> 	char pA[] = { 0, 1, 2, 3 };
+</I>&gt;&gt;<i> 	char pB[] = { 4, 5, 6, 7 };
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> 	void *pArray[] =
+</I>&gt;&gt;<i> 	{
+</I>&gt;&gt;<i> 		pA,
+</I>&gt;&gt;<i> 		pB,
+</I>&gt;&gt;<i> 	};
+</I>&gt;&gt;<i> Also the member pointer of structure cannot be initialized in declaration
+</I>&gt;&gt;<i> part. In this case, you have to
+</I>&gt;&gt;<i> make the function to initialize the pointer variable.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Is this an issue you can solve in your toolchain? Or is it really an issue
+</I>&gt;&gt;<i> in the TAP loader on the toppy itself.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> There is an object framework in C I would like to port to the toppy, but I
+</I>&gt;&gt;<i> can't do this now due to this bug.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Cheers,
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Dani&#235;l
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> TAP-devel mailing list
+</I>&gt;&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/tap-devel">TAP-devel at lists.berlios.de</A>
+</I>&gt;&gt;<i> <A HREF="http://lists.berlios.de/mailman/listinfo/tap-devel">http://lists.berlios.de/mailman/listinfo/tap-devel</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> TAP-devel mailing list
+</I>&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/tap-devel">TAP-devel at lists.berlios.de</A>
+</I>&gt;<i> <A HREF="http://lists.berlios.de/mailman/listinfo/tap-devel">http://lists.berlios.de/mailman/listinfo/tap-devel</A>
+</I>&gt;<i>   
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="https://lists.berlios.de/pipermail/tap-devel/attachments/20060219/4386c3fe/attachment.html">https://lists.berlios.de/pipermail/tap-devel/attachments/20060219/4386c3fe/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000055.html">[TAP-devel] Initialisation of pointers in global variables
+</A></li>
+	<LI>Next message: <A HREF="000057.html">[TAP-devel] C++ taps - support for virtual functions on templates
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#56">[ date ]</a>
+              <a href="thread.html#56">[ thread ]</a>
+              <a href="subject.html#56">[ subject ]</a>
+              <a href="author.html#56">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/tap-devel">More information about the TAP-devel
+mailing list</a><br>
+</body></html>

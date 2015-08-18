@@ -1,0 +1,548 @@
+From simon.capewell at gmail.com  Wed Nov  9 02:11:06 2005
+From: simon.capewell at gmail.com (Simon Capewell)
+Date: Wed, 09 Nov 2005 01:11:06 +0000
+Subject: [TAP-devel] API workarounds
+Message-ID: <43714CAA.50503@gmail.com>
+
+I've got a couple of functions I'd like to share that work around bugs 
+in TAP_Hdd_GetPlayInfo and TAP_Hdd_GetRecInfo. What's the most suitable 
+location? libutils or a new library?
+
+
+From j_de_angelis at hotmail.com  Wed Nov  9 11:20:39 2005
+From: j_de_angelis at hotmail.com (John De Angelis)
+Date: Wed, 09 Nov 2005 21:20:39 +1100
+Subject: [TAP-devel] API workarounds
+In-Reply-To: <43714CAA.50503@gmail.com>
+Message-ID: <BAY107-F1471431E543E88F5623CC3DF670@phx.gbl>
+
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/tap-devel/attachments/20051109/24004b7b/attachment.html>
+
+From simon.capewell at gmail.com  Wed Nov  9 11:28:56 2005
+From: simon.capewell at gmail.com (Simon Capewell)
+Date: Wed, 9 Nov 2005 10:28:56 +0000
+Subject: [TAP-devel] API workarounds
+In-Reply-To: <BAY107-F1471431E543E88F5623CC3DF670@phx.gbl>
+References: <43714CAA.50503@gmail.com>
+	 <BAY107-F1471431E543E88F5623CC3DF670@phx.gbl>
+Message-ID: <750d52ca0511090228g2737edbcv@mail.gmail.com>
+
+libutils it is then.
+
+On 09/11/05, John De Angelis <j_de_angelis at hotmail.com> wrote:
+>
+>
+> Hi Simon,
+>
+> libutils is really a distribution mechanism for some useful utilities. If
+> that's what you're planning for these functions then I agree. If on the
+> otherhand you intend that people take the source and incorporate it into
+> their code then maybe we need another section called "sample" or something
+> like that?
+>
+> cheers,
+>
+> John
+>
+>
+>  ________________________________
+>
+> From:  Simon Capewell <simon.capewell at gmail.com>
+> To:  tap-devel at lists.berlios.de
+> Subject:  [TAP-devel] API workarounds
+> Date:  Wed, 09 Nov 2005 01:11:06 +0000
+> >I've got a couple of functions I'd like to share that work around
+> >bugs in TAP_Hdd_GetPlayInfo and TAP_Hdd_GetRecInfo. What's the most
+> >suitable location? libutils or a new library?
+> >_______________________________________________
+> >TAP-devel mailing list
+> >TAP-devel at lists.berlios.de
+> >http://lists.berlios.de/mailman/listinfo/tap-devel
+>  _______________________________________________ TAP-devel
+> mailing list TAP-devel at lists.berlios.de
+> http://lists.berlios.de/mailman/listinfo/tap-devel
+
+
+From berlios at urbanec.net  Thu Nov 24 07:33:24 2005
+From: berlios at urbanec.net (Peter Urbanec)
+Date: Thu, 24 Nov 2005 17:33:24 +1100
+Subject: [TAP-devel] File releases
+Message-ID: <43855EB4.1030705@urbanec.net>
+
+The TAP project has had a few contributions recently and the SVN 
+repository now has some code that is probably ready for release. I would 
+like to encourage individual authors to make use of the BerliOS 
+facilities and prepare file releases for their work. This will help both 
+the end users and the TAP project. End users will have easy access to 
+released product and the TAP project will have wider acceptance because 
+there are usable downloads.
+
+The file release process is fairly simple. At a bare minimum you have to 
+compile the source code and package it into a downloadable file (.tar.gz 
+or .zip are good candidates). You can prepare a multi-file release if 
+you wish, for example one file with source code, another with TAP and 
+related files and a third one with client application to be installed on 
+a PC.
+
+Ensure that the downloadable files have a unique file name. For example, 
+MyTAP_1.3.zip is good, but MyTAP.zip isn't suitable.
+
+Upload the file(s) anonymously with FTP to 
+ftp://ftp.berlios.de/incoming/ - do not forget to use binary mode.
+
+If this is the first time you are releasing a package, send an email to 
+the tap-devel list advising of the uploaded filename and what 
+package/release these files form. I will create the required setup on 
+the backend for the file release and make the files available.
+
+If this is a subsequent revision of a package already released (or if 
+you are familiar with the file release process), you can use the BerliOS 
+file release mechanisms to create and release new packages/revisions 
+your self. The Quick-Release File process may be suitable for releasing 
+version updates of existing packages.
+
+As always, if there are any questions or suggestions, please feel free 
+to post them to the mailing list.
+
+
+From simon.capewell at gmail.com  Thu Nov 24 11:09:22 2005
+From: simon.capewell at gmail.com (Simon Capewell)
+Date: Thu, 24 Nov 2005 10:09:22 +0000
+Subject: [TAP-devel] File releases
+In-Reply-To: <43855EB4.1030705@urbanec.net>
+References: <43855EB4.1030705@urbanec.net>
+Message-ID: <750d52ca0511240209q62da2871j@mail.gmail.com>
+
+Can I suggest a simplified downloads page for end users that always
+links to the latest version of each TAP? People that want source or
+older versions could continue to look at the default downloads page.
+
+On 24/11/05, Peter Urbanec <berlios at urbanec.net> wrote:
+> The TAP project has had a few contributions recently and the SVN
+> repository now has some code that is probably ready for release. I would
+> like to encourage individual authors to make use of the BerliOS
+> facilities and prepare file releases for their work. This will help both
+> the end users and the TAP project. End users will have easy access to
+> released product and the TAP project will have wider acceptance because
+> there are usable downloads.
+>
+> The file release process is fairly simple. At a bare minimum you have to
+> compile the source code and package it into a downloadable file (.tar.gz
+> or .zip are good candidates). You can prepare a multi-file release if
+> you wish, for example one file with source code, another with TAP and
+> related files and a third one with client application to be installed on
+> a PC.
+>
+> Ensure that the downloadable files have a unique file name. For example,
+> MyTAP_1.3.zip is good, but MyTAP.zip isn't suitable.
+>
+> Upload the file(s) anonymously with FTP to
+> ftp://ftp.berlios.de/incoming/ - do not forget to use binary mode.
+>
+> If this is the first time you are releasing a package, send an email to
+> the tap-devel list advising of the uploaded filename and what
+> package/release these files form. I will create the required setup on
+> the backend for the file release and make the files available.
+>
+> If this is a subsequent revision of a package already released (or if
+> you are familiar with the file release process), you can use the BerliOS
+> file release mechanisms to create and release new packages/revisions
+> your self. The Quick-Release File process may be suitable for releasing
+> version updates of existing packages.
+>
+> As always, if there are any questions or suggestions, please feel free
+> to post them to the mailing list.
+> _______________________________________________
+> TAP-devel mailing list
+> TAP-devel at lists.berlios.de
+> http://lists.berlios.de/mailman/listinfo/tap-devel
+>
+
+
+From berlios at urbanec.net  Fri Nov 25 01:27:51 2005
+From: berlios at urbanec.net (Peter Urbanec)
+Date: Fri, 25 Nov 2005 11:27:51 +1100
+Subject: [TAP-devel] File releases
+In-Reply-To: <750d52ca0511240209q62da2871j@mail.gmail.com>
+References: <43855EB4.1030705@urbanec.net> <750d52ca0511240209q62da2871j@mail.gmail.com>
+Message-ID: <43865A87.2020208@urbanec.net>
+
+Simon Capewell wrote:
+
+>Can I suggest a simplified downloads page for end users that always
+>links to the latest version of each TAP? People that want source or
+>older versions could continue to look at the default downloads page.
+>  
+>
+
+Good idea. Once we have a few more released packages (rather than just 
+the toolchain), I'll take a look at adding a simple downloads page with 
+direct links to current versions.
+
+Keeping the simple downloads page up to date will require some extra 
+work when performing file releases to ensure that there are no broken 
+links and that the latest versions are actually visible.
+
+
+From j_de_angelis at hotmail.com  Sun Nov 27 23:57:41 2005
+From: j_de_angelis at hotmail.com (John De Angelis)
+Date: Mon, 28 Nov 2005 09:57:41 +1100
+Subject: [TAP-devel] File releases
+In-Reply-To: <43855EB4.1030705@urbanec.net>
+Message-ID: <BAY107-F3F363B10E4E3884D88C5FDF490@phx.gbl>
+
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/tap-devel/attachments/20051128/f763b18a/attachment.html>
+
+From simon.capewell at gmail.com  Tue Nov 29 11:07:01 2005
+From: simon.capewell at gmail.com (Simon Capewell)
+Date: Tue, 29 Nov 2005 10:07:01 +0000
+Subject: [TAP-devel] Tools to be used as part of a build
+Message-ID: <750d52ca0511290207w33d70b51h@mail.gmail.com>
+
+Where's the best place to put source for tools that will be referenced
+from a makefile? Should these become part of the toolchain?
+I have a command line bitmap to pixmap converter that would be useful as
+part of a build process.
+
+
+From berlios at urbanec.net  Wed Nov 30 04:44:58 2005
+From: berlios at urbanec.net (Peter Urbanec)
+Date: Wed, 30 Nov 2005 14:44:58 +1100
+Subject: [TAP-devel] Tools to be used as part of a build
+In-Reply-To: <750d52ca0511290207w33d70b51h@mail.gmail.com>
+References: <750d52ca0511290207w33d70b51h@mail.gmail.com>
+Message-ID: <438D203A.2090204@urbanec.net>
+
+Simon Capewell wrote:
+
+>Where's the best place to put source for tools that will be referenced
+>from a makefile? Should these become part of the toolchain?
+>I have a command line bitmap to pixmap converter that would be useful as
+>part of a build process.
+>
+
+That depends on the exact details. If the code is portable and will work 
+on all supported platforms without unreasonable dependencies, it can 
+become part of the build process. In that case, it can go into 
+trunk/tools/toolname
+
+On the other hand, if the tool is platform specific, it should go into 
+trunk/host/platform/toolname, but it should not be a required component 
+for anything that is not specific to that platform. For example, if you 
+have a bitmap converter for Win32 only, it can only be used for projects 
+in trunk/host/Win32.
+
+If your tool is platform specific, but generates files that can still be 
+used to build on other platforms, you should add the generated files to 
+the repository. For example, if the hypothetical bitmap converter tool 
+generates bitmap.c for use in mytap, you should add the generated 
+bitmap.c to the trunk/taps/mytap directory. This will allow people on 
+platforms other than Win32 to build the TAP.
+
+
+From robin_tap at rattus.homelinux.com  Wed Nov 30 10:27:31 2005
+From: robin_tap at rattus.homelinux.com (Robin Glover)
+Date: Wed, 30 Nov 2005 09:27:31 +0000
+Subject: [TAP-devel] C++ - what am I missing?
+Message-ID: <438D7083.2010208@rattus.homelinux.com>
+
+I saw Peter Urbanec's post here about getting C++ to work in TAPs and
+thought I'd give that a go (largely because I'm getting fed up with my
+compiler reminding me that it hasn't declared my variable because I
+didn't put it at the the beginning of a block).
+
+Changed the makefile for the toolchain to have '-enable-languages=c,c++'
+and it all built fine - this allows me to compile and run c++ syntax
+code fine in TAPs but any attempt to call any class member variable
+results in an immediate reboot. This applies to static member vars,
+overloaded operator new (including placement varieties), ctor when
+trying to allocate a local object on the stack, etc. I can't define a
+global override for operator new, since it clashes with __builtin_new in
+libtap.a. The best I could do was define a global placement operator new
+(void * operator new (size_t size, other some_other_param)) which did
+get called, but the toppy rebooted immediately after - presumably trying
+to call the class ctor?
+
+I'm using the c++ compile flags specified in tap.mk - -fno-rtti,
+-fno-excpetions, -Wno-pmf-conversions. Is there another incantation I
+need to add, or can someone send me some sample code that's known to
+work - I'm quite happy to explore from there.
+
+cheers,
+
+Robin
+
+
+
+
+From robin_tap at rattus.homelinux.com  Wed Nov 30 16:56:22 2005
+From: robin_tap at rattus.homelinux.com (Robin Glover)
+Date: Wed, 30 Nov 2005 15:56:22 +0000
+Subject: [TAP-devel] C++ - what am I missing?
+In-Reply-To: <438D7083.2010208@rattus.homelinux.com>
+References: <438D7083.2010208@rattus.homelinux.com>
+Message-ID: <438DCBA6.5010704@rattus.homelinux.com>
+
+Ok, I can answer my own question now.
+
+adding '-fno-weak' to the g++ compile options fixes the problem.
+
+It seems that the weak linkage specification for the sections containing
+the c++ class member definitions was causing the assembler to change the
+way it tries to work out the address of the function. For functions in a
+non-weak section, the address is calculated (effectively) by taking the
+tap base address and adding on an offset. For functions in .weak
+sections there seems to be a memory address that contains the address of
+the function (not sure what sets this up). The assembler puts together
+instructions that gets the content of this memory, *then* still adds the
+offset of the function from the beginning of the tap memory, effectively
+adjusting twice for the offset from the tap base address and meaning
+that the function call heads off to somewhere undefined.
+
+I have a whole ream of dissasembly that shows the differences, but it's
+not really that interesting once you know what to do to fix the problem...
+
+hope this is useful to someone
+
+Robin
+
+Robin Glover wrote:
+
+>I saw Peter Urbanec's post here about getting C++ to work in TAPs and
+>thought I'd give that a go (largely because I'm getting fed up with my
+>compiler reminding me that it hasn't declared my variable because I
+>didn't put it at the the beginning of a block).
+>
+>Changed the makefile for the toolchain to have '-enable-languages=c,c++'
+>and it all built fine - this allows me to compile and run c++ syntax
+>code fine in TAPs but any attempt to call any class member variable
+>results in an immediate reboot. This applies to static member vars,
+>overloaded operator new (including placement varieties), ctor when
+>trying to allocate a local object on the stack, etc. I can't define a
+>global override for operator new, since it clashes with __builtin_new in
+>libtap.a. The best I could do was define a global placement operator new
+>(void * operator new (size_t size, other some_other_param)) which did
+>get called, but the toppy rebooted immediately after - presumably trying
+>to call the class ctor?
+>
+>I'm using the c++ compile flags specified in tap.mk - -fno-rtti,
+>-fno-excpetions, -Wno-pmf-conversions. Is there another incantation I
+>need to add, or can someone send me some sample code that's known to
+>work - I'm quite happy to explore from there.
+>
+>cheers,
+>
+>Robin
+>
+>
+>_______________________________________________
+>TAP-devel mailing list
+>TAP-devel at lists.berlios.de
+>http://lists.berlios.de/mailman/listinfo/tap-devel
+>  
+>
+
+
+From simon.capewell at gmail.com  Wed Nov 30 17:06:35 2005
+From: simon.capewell at gmail.com (Simon Capewell)
+Date: Wed, 30 Nov 2005 16:06:35 +0000
+Subject: [TAP-devel] C++ - what am I missing?
+In-Reply-To: <438DCBA6.5010704@rattus.homelinux.com>
+References: <438D7083.2010208@rattus.homelinux.com>
+	 <438DCBA6.5010704@rattus.homelinux.com>
+Message-ID: <750d52ca0511300806h7b795f90k@mail.gmail.com>
+
+Excellent news. Does this mean the C++ toolchain is usable? Are there
+any obvious things to avoid other than the virtual function problem?
+
+Coming from a C++ background, I'd like to be able to do the following:
+Use default parameters
+Not have to worry about variable declaration at the top of scope
+Namespace libraries using classes of static methods and variables or
+the namespace keyword.
+Create a simple framework for dispatching keypresses and idle messages
+to an active 'window'
+Create simple classes to do things like display message boxes and wait
+for user input
+
+Are constructors and destructors of global class variables called on
+TAP load and exit?
+
+
+From robin_tap at rattus.homelinux.com  Wed Nov 30 17:21:28 2005
+From: robin_tap at rattus.homelinux.com (Robin Glover)
+Date: Wed, 30 Nov 2005 16:21:28 +0000
+Subject: [TAP-devel] C++ - what am I missing?
+In-Reply-To: <750d52ca0511300806h7b795f90k@mail.gmail.com>
+References: <438D7083.2010208@rattus.homelinux.com>	 <438DCBA6.5010704@rattus.homelinux.com> <750d52ca0511300806h7b795f90k@mail.gmail.com>
+Message-ID: <438DD188.9090907@rattus.homelinux.com>
+
+
+Simon Capewell wrote:
+
+>Excellent news. Does this mean the C++ toolchain is usable? Are there
+>any obvious things to avoid other than the virtual function problem?
+>  
+>
+I'm going to say 'yes' from my experience so far. Not found anything
+else broken yet, but I've hardly had it working at all for very long
+:-). I'm trying to get a memory dump of the vtable pointer and the
+vtable itself to see what's going on, but no luck yet.
+
+>Coming from a C++ background, I'd like to be able to do the following:
+>Use default parameters
+>  
+>
+Compiles ok, should work.
+
+>Not have to worry about variable declaration at the top of scope
+>  
+>
+Worked for me.
+
+>Namespace libraries using classes of static methods and variables or
+>the namespace keyword.
+>  
+>
+Should work - it'll just mangle the names a bit more I think. There
+might be a limit to name length?
+
+>Create a simple framework for dispatching keypresses and idle messages
+>to an active 'window'
+>  
+>
+I was starting to do something like this via function pointers in C, but
+it'll move to c++ now
+
+>Create simple classes to do things like display message boxes and wait
+>for user input
+>
+>Are constructors and destructors of global class variables called on
+>TAP load and exit?
+>  
+>
+Good question - will try to experiment later.
+
+Robin
+
+
+From simon.capewell at gmail.com  Wed Nov 30 17:35:01 2005
+From: simon.capewell at gmail.com (Simon Capewell)
+Date: Wed, 30 Nov 2005 16:35:01 +0000
+Subject: [TAP-devel] C++ - what am I missing?
+In-Reply-To: <438DD188.9090907@rattus.homelinux.com>
+References: <438D7083.2010208@rattus.homelinux.com>
+	 <438DCBA6.5010704@rattus.homelinux.com>
+	 <750d52ca0511300806h7b795f90k@mail.gmail.com>
+	 <438DD188.9090907@rattus.homelinux.com>
+Message-ID: <750d52ca0511300835k7bb14fa0u@mail.gmail.com>
+
+Did all those new/delete problems disappear too?
+
+I have a prototype CommonUI library in progress as a proof of concept
+that the UK/OZ components can be factored out easily that I was going
+to check in to berlios last night, but ran out of time. So far I've
+got it supporting the keyboard screen (minus flashing caret) and
+yesnobox and have a demo TAP that uses it. I'd like to take this
+further as a sort of generic TAP framework with TSRCommander and
+RemoteExtender support built in, but C was getting my brain tied in
+knots. I'd be interested in comparing our architectures - mine was
+thrown together last night in an hour or so and isn't entirely worthy
+of the architecture title!
+
+BTW Kriptic produced an example messagebox class which is worth a
+look. See http://web.aanet.com.au/kriptic/TAPs
+
+@Peter:
+Another Berlios question, where is the best place to put work that you
+know is going to have a limited lifespan? This would be good for
+demoing prototypes of TAPs and libraries.
+
+
+From robin_tap at rattus.homelinux.com  Wed Nov 30 18:01:06 2005
+From: robin_tap at rattus.homelinux.com (Robin Glover)
+Date: Wed, 30 Nov 2005 17:01:06 +0000
+Subject: [TAP-devel] C++ - what am I missing?
+In-Reply-To: <750d52ca0511300835k7bb14fa0u@mail.gmail.com>
+References: <438D7083.2010208@rattus.homelinux.com>	 <438DCBA6.5010704@rattus.homelinux.com>	 <750d52ca0511300806h7b795f90k@mail.gmail.com>	 <438DD188.9090907@rattus.homelinux.com> <750d52ca0511300835k7bb14fa0u@mail.gmail.com>
+Message-ID: <438DDAD2.2060909@rattus.homelinux.com>
+
+I still have custom new/delete functions in my test class - not tried
+taking them out to being global overrides yet, or putting back the
+templatized base class that provided them automatically. I'm fairly
+confident that the template, at least, will work.
+
+I tried a global class and the constructor isn't called on tap load -
+the memory of the object does seem to be initialized to zero though. You
+can work around this with a singleton pattern if needed where you
+construct the object on first access instead. Freeing up resources on
+tap exit of the singleton would need to be attended to though.
+
+I found the vtable (gcc seems to put the pointer to it at the end of the
+object, whereas msvc puts it at the start). Looks like the problem is
+that the function addresses in the vtable aren't being offset by the tap
+base adress. If that's the only problem it should be possible to write
+some code to fix them up inside TAP_Main. The format of the vtable seems
+to be
+
+word 0   // preamble - probably not always zeros for inheritance or
+virtual/multiple inheritance
+word 0
+dword 0 // end of preamble
+
+word 0   // offsets for this pointer for 1st virtual method
+word 0
+dword &first_virtualmethod
+word 0   // offsets for this pointer for 2nd virtual method
+word 0
+dword &second_virtualmethod
+...
+dword 0 // zeros at the end terminate the list?
+dword 0
+
+So there's 8 bytes at the beginning to leave alone, then 8 bytes per
+method needing adjustment in the second dword until you hit 8 bytes that
+are all zero.
+
+The last 4 bytes of the object itself are a pointer to this structure. I
+will try to write some code to do this, but I don't think I'll have a
+chance to test it out this evening.
+
+I think that the idea of common libraries is great - what I really want
+to do is write a better search TAP (that can use mystuff extended info
+data, will not record 2 copies of the same episode, etc), but so far
+I've written an emulator, a UI library for displaying lists of things
+and now spent time getting c++ working. Still, it's all good fun!
+
+Robin
+
+
+
+Simon Capewell wrote:
+
+>Did all those new/delete problems disappear too?
+>
+>I have a prototype CommonUI library in progress as a proof of concept
+>that the UK/OZ components can be factored out easily that I was going
+>to check in to berlios last night, but ran out of time. So far I've
+>got it supporting the keyboard screen (minus flashing caret) and
+>yesnobox and have a demo TAP that uses it. I'd like to take this
+>further as a sort of generic TAP framework with TSRCommander and
+>RemoteExtender support built in, but C was getting my brain tied in
+>knots. I'd be interested in comparing our architectures - mine was
+>thrown together last night in an hour or so and isn't entirely worthy
+>of the architecture title!
+>
+>BTW Kriptic produced an example messagebox class which is worth a
+>look. See http://web.aanet.com.au/kriptic/TAPs
+>
+>@Peter:
+>Another Berlios question, where is the best place to put work that you
+>know is going to have a limited lifespan? This would be good for
+>demoing prototypes of TAPs and libraries.
+>  
+>
+
+

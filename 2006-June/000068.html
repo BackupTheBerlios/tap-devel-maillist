@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [TAP-devel] Linking problem
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/tap-devel/2006-June/index.html" >
+   <LINK REL="made" HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Linking%20problem&In-Reply-To=%3C20060603161148.19827.qmail%40web35404.mail.mud.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000069.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[TAP-devel] Linking problem</H1>
+    <B>Rai Chea</B> 
+    <A HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Linking%20problem&In-Reply-To=%3C20060603161148.19827.qmail%40web35404.mail.mud.yahoo.com%3E"
+       TITLE="[TAP-devel] Linking problem">raichea at yahoo.com
+       </A><BR>
+    <I>Sat Jun  3 18:11:48 CEST 2006</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000069.html">[TAP-devel] C++ Toolchain
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#68">[ date ]</a>
+              <a href="thread.html#68">[ thread ]</a>
+              <a href="subject.html#68">[ subject ]</a>
+              <a href="author.html#68">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Have successfully installed the Cygwin environment and can compile some of the sample apps - the ones that are effectively a single *.c file (maybe many but all #included into a single file). (BTW, some of the UK project apps have build errors, but I assume this is known).
+  
+To test linking, I'm trying to compile the Topfield fireclock. I've modified the skeleton Makefile but for some reason the linker is not being invoked. I get fire.o and clock.o created but they do not get linked into an elf, and so the tap isn't created. The relevant entries in the Makefile are: 
+  
+ fclk.elf:: fire.o clock.o  &lt;- does this need ::? I've tried with just : too... 
+ fire.o: fire.c 
+ clock.o: clock.c 
+  
+Some of the taps included with the toolchain do seem to call the linker, but the Makefiles are much more complex. I've dug into the documentation a little, and think I understand what tap.mk does and can't see why the &quot;elf&quot; line above doesn't invoke the linker. 
+  
+ Can anyone suggest what might be the problem? 
+  
+ Thanks, Steve.
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000069.html">[TAP-devel] C++ Toolchain
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#68">[ date ]</a>
+              <a href="thread.html#68">[ thread ]</a>
+              <a href="subject.html#68">[ subject ]</a>
+              <a href="author.html#68">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/tap-devel">More information about the TAP-devel
+mailing list</a><br>
+</body></html>

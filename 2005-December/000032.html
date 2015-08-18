@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [TAP-devel] C++ - fixing v-table problems
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/tap-devel/2005-December/index.html" >
+   <LINK REL="made" HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20C%2B%2B%20-%20fixing%20v-table%20problems&In-Reply-To=%3C439600B8.5070902%40rattus.homelinux.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000031.html">
+   <LINK REL="Next"  HREF="000033.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[TAP-devel] C++ - fixing v-table problems</H1>
+    <B>Robin Glover</B> 
+    <A HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20C%2B%2B%20-%20fixing%20v-table%20problems&In-Reply-To=%3C439600B8.5070902%40rattus.homelinux.com%3E"
+       TITLE="[TAP-devel] C++ - fixing v-table problems">robin_tap at rattus.homelinux.com
+       </A><BR>
+    <I>Tue Dec  6 22:20:56 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000031.html">[TAP-devel] C++ - fixing v-table problems
+</A></li>
+        <LI>Next message: <A HREF="000033.html">[TAP-devel] C++ - fixing v-table problems
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#32">[ date ]</a>
+              <a href="thread.html#32">[ thread ]</a>
+              <a href="subject.html#32">[ subject ]</a>
+              <a href="author.html#32">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Just for the record you can create a version of libtap.a with the broken
+__builtin_new removed fairly easily - extract init.o from libtap.a, use
+mips-objcopy -N __builtin_new init.o newinit.o to create a copy of the
+object file with the offending symbol removed, rename back and re-create
+the archive (not forgetting to ranlib).
+
+It's then possible to define a set of global new/delete operators which
+work rather than having to define them on a class-by-class basis. You
+could even put a .o with them in into libtap.o, I suppose.
+
+I think that pretty much means that the basic c++ features can be made
+to work - no idea whether things like multiple/virtual inheritance work
+yet, or pointers to member functions, but mostly you can get away
+without needing that sort of stuff. It's certainly better than C (he
+says  :-)  ). One last note is that constructors of static or global
+objects do not get called at tap startup (and destructors presumably
+don't get called at exit either).
+
+Robin
+
+
+
+Robin Glover wrote:
+
+&gt;<i> I have successfully made virtual function calls work on the topfield
+</I>&gt;<i> by fixing up the v-tables of each class with virtual functions using
+</I>&gt;<i> the following code. The problem seems to be that the function pointers
+</I>&gt;<i> inside the v-table are not being adjusted for the tap base address
+</I>&gt;<i> when the tap loads into memory. The code performs this adjustment, and
+</I>&gt;<i> should be called for each class with virtual functions, probably at
+</I>&gt;<i> the start of your TAP_Main.
+</I>&gt;<i>
+</I>&gt;<i> Note that you still have to provide custom operator new &amp; delete for
+</I>&gt;<i> each class. There seems to be a broken global operator new inside
+</I>&gt;<i> libtap.a which prevents you from simply defining global
+</I>&gt;<i> implementations. I also have to add -fno-weak to the g++ command line
+</I>&gt;<i> to avoid every single class member call from crashing the topfield due
+</I>&gt;<i> to double counting the address offset of the call destination from the
+</I>&gt;<i> tap base address.
+</I>&gt;<i>
+</I>&gt;<i> Robin
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> struct vtableItem
+</I>&gt;<i> {
+</I>&gt;<i>    unsigned short offs1;
+</I>&gt;<i>    unsigned short offs2;
+</I>&gt;<i>    unsigned long fnPtr;
+</I>&gt;<i> };
+</I>&gt;<i>
+</I>&gt;<i> struct vtable
+</I>&gt;<i> {
+</I>&gt;<i>    vtableItem preamble;
+</I>&gt;<i>    vtableItem items[];
+</I>&gt;<i> };
+</I>&gt;<i>
+</I>&gt;<i> template &lt;typename T&gt; void FixupVTable()
+</I>&gt;<i> {
+</I>&gt;<i>    T object;
+</I>&gt;<i>    char* objPtr = (char*) &object;
+</I>&gt;<i>    objPtr += sizeof(T) - 4; // the pointer to the v-table seems to be
+</I>&gt;<i> at the end of the object
+</I>&gt;<i>
+</I>&gt;<i>    vtable* pVtable = *((vtable**)objPtr);
+</I>&gt;<i>
+</I>&gt;<i>    // preamble has always been zero (so far), so if it doesn't look
+</I>&gt;<i> right, we give up
+</I>&gt;<i>    if (pVtable-&gt;preamble.offs1 != 0)
+</I>&gt;<i>        return;
+</I>&gt;<i>
+</I>&gt;<i>    if (pVtable-&gt;preamble.offs2 != 0)
+</I>&gt;<i>        return;
+</I>&gt;<i>
+</I>&gt;<i>    if (pVtable-&gt;preamble.fnPtr != 0)
+</I>&gt;<i>        return;
+</I>&gt;<i>
+</I>&gt;<i>    for (int i=0; i&lt;1000; i++) // can increase if you have &gt; 1000
+</I>&gt;<i> virtual functions!
+</I>&gt;<i>    {
+</I>&gt;<i>        vtableItem&amp; item = pVtable-&gt;items[i];
+</I>&gt;<i>        if (item.fnPtr &gt; 0x200000 ) // a 2mb tap? no, surely not. This
+</I>&gt;<i> pointer probably already adjusted
+</I>&gt;<i>            continue;
+</I>&gt;<i>
+</I>&gt;<i>        if (item.fnPtr == 0) // the compiler inserts 8 bytes of 0's at
+</I>&gt;<i> end of vtable - when we hit that we can stop
+</I>&gt;<i>            break; // that's all folks
+</I>&gt;<i>
+</I>&gt;<i>        item.fnPtr += _tap_startAddr;
+</I>&gt;<i>    }
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> TAP-devel mailing list
+</I>&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/tap-devel">TAP-devel at lists.berlios.de</A>
+</I>&gt;<i> <A HREF="http://lists.berlios.de/mailman/listinfo/tap-devel">http://lists.berlios.de/mailman/listinfo/tap-devel</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000031.html">[TAP-devel] C++ - fixing v-table problems
+</A></li>
+	<LI>Next message: <A HREF="000033.html">[TAP-devel] C++ - fixing v-table problems
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#32">[ date ]</a>
+              <a href="thread.html#32">[ thread ]</a>
+              <a href="subject.html#32">[ subject ]</a>
+              <a href="author.html#32">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/tap-devel">More information about the TAP-devel
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,121 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [TAP-devel] Initialisation of pointers in global variables
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/tap-devel/2006-February/index.html" >
+   <LINK REL="made" HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Initialisation%20of%20pointers%20in%20global%20variables&In-Reply-To=%3C43F787A8.8030501%40rattus.homelinux.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000053.html">
+   <LINK REL="Next"  HREF="000055.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[TAP-devel] Initialisation of pointers in global variables</H1>
+    <B>Robin Glover</B> 
+    <A HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Initialisation%20of%20pointers%20in%20global%20variables&In-Reply-To=%3C43F787A8.8030501%40rattus.homelinux.com%3E"
+       TITLE="[TAP-devel] Initialisation of pointers in global variables">robin_tap at rattus.homelinux.com
+       </A><BR>
+    <I>Sat Feb 18 21:46:32 CET 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000053.html">[TAP-devel] Initialisation of pointers in global variables
+</A></li>
+        <LI>Next message: <A HREF="000055.html">[TAP-devel] Initialisation of pointers in global variables
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#54">[ date ]</a>
+              <a href="thread.html#54">[ thread ]</a>
+              <a href="subject.html#54">[ subject ]</a>
+              <a href="author.html#54">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Daniel,
+
+as you suggest it's a problem with the TAP loader on the toppy, which
+has no capability for proper relocation of the code. Most of the time it
+gets away with this due to the fact that the MIPS assembler is tweaked
+to use a relative addressing mode, so it doesn't matter where in memory
+the TAP is put because the offset between the instruction accessing the
+global data and the data itself is the same. In the case of pointers
+such as the example you give (or the function pointers in a c++ classes
+vtable) it doesn't work, since the assembly loads what it thinks is the
+address of the data or function from the variable, ends up with
+something pointing to near the beginning of memory space rather than in
+the body of the tap and dereferences/calls that. Reboot...
+
+For c++ we get around this by having code that adds _tap_base_address to
+each function pointer in the vtable of each class when the tap is
+loaded. This can be automated since you can dump the symbols in the .elf
+file and find the vtables (start with _vt$). Much harder for
+data/function pointer arrays - I suppose you could append _fixme to the
+name of each variable that needed fixing, so that you could find them in
+the name dump. Have a look at tap++.mk in the libc++utils folder (on
+berlios) to see how it's done for vtable function pointers.
+
+Robin
+
+Dani&#235;l te Winkel wrote:
+&gt;<i> Hi guys,
+</I>&gt;<i>
+</I>&gt;<i> In the manual for the TAP API 1.22, on page 12 and 13, Topfield say:
+</I>&gt;<i>
+</I>&gt;<i> Static initialized variables of the function pointer or the variable pointer
+</I>&gt;<i> cannot be permitted due to complier BUG.
+</I>&gt;<i> For example, the below pArray will not be initialize.
+</I>&gt;<i> 	char pA[] = { 0, 1, 2, 3 };
+</I>&gt;<i> 	char pB[] = { 4, 5, 6, 7 };
+</I>&gt;<i>
+</I>&gt;<i> 	void *pArray[] =
+</I>&gt;<i> 	{
+</I>&gt;<i> 		pA,
+</I>&gt;<i> 		pB,
+</I>&gt;<i> 	};
+</I>&gt;<i> Also the member pointer of structure cannot be initialized in declaration
+</I>&gt;<i> part. In this case, you have to
+</I>&gt;<i> make the function to initialize the pointer variable.
+</I>&gt;<i>
+</I>&gt;<i> Is this an issue you can solve in your toolchain? Or is it really an issue
+</I>&gt;<i> in the TAP loader on the toppy itself.
+</I>&gt;<i>
+</I>&gt;<i> There is an object framework in C I would like to port to the toppy, but I
+</I>&gt;<i> can't do this now due to this bug.
+</I>&gt;<i>
+</I>&gt;<i> Cheers,
+</I>&gt;<i>
+</I>&gt;<i> Dani&#235;l
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> TAP-devel mailing list
+</I>&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/tap-devel">TAP-devel at lists.berlios.de</A>
+</I>&gt;<i> <A HREF="http://lists.berlios.de/mailman/listinfo/tap-devel">http://lists.berlios.de/mailman/listinfo/tap-devel</A>
+</I>&gt;<i>   
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000053.html">[TAP-devel] Initialisation of pointers in global variables
+</A></li>
+	<LI>Next message: <A HREF="000055.html">[TAP-devel] Initialisation of pointers in global variables
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#54">[ date ]</a>
+              <a href="thread.html#54">[ thread ]</a>
+              <a href="subject.html#54">[ subject ]</a>
+              <a href="author.html#54">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/tap-devel">More information about the TAP-devel
+mailing list</a><br>
+</body></html>

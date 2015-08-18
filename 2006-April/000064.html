@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [TAP-devel] compiling TAPcommander
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/tap-devel/2006-April/index.html" >
+   <LINK REL="made" HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20compiling%20TAPcommander&In-Reply-To=%3C200604300858.19905.markb%40berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000065.html">
+   <LINK REL="Next"  HREF="000066.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[TAP-devel] compiling TAPcommander</H1>
+    <B>Mark Blakeney</B> 
+    <A HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20compiling%20TAPcommander&In-Reply-To=%3C200604300858.19905.markb%40berlios.de%3E"
+       TITLE="[TAP-devel] compiling TAPcommander">markb at berlios.de
+       </A><BR>
+    <I>Sun Apr 30 00:58:19 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000065.html">[TAP-devel] compiling TAPcommander
+</A></li>
+        <LI>Next message: <A HREF="000066.html">[TAP-devel] compiling TAPcommander
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#64">[ date ]</a>
+              <a href="thread.html#64">[ thread ]</a>
+              <a href="subject.html#64">[ subject ]</a>
+              <a href="author.html#64">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Saturday 29 April 2006 06:54, Alan Rickayzen wrote:
+&gt;<i> Hi experts, I was hoping to compile TAPcommander on berlios but I'm
+</I>&gt;<i> not sure how much time I'll have to invest. I followed the
+</I>&gt;<i> installation instructions and verified that freespacebar compiled (it
+</I>&gt;<i> did).
+</I>
+I'm not an expert (I've not yet written a line of TAP code yet) but I
+did download and install the C++ toolchain recently, see my posts from
+last months list archive. All the necessary C++ toolchain changes exist
+in svn so just checkout the toolchain directory, type make and make
+install, and you should have the C++ toolchain built up in
+/usr/local/topfield-gcc/. It just appears nobody has yet gotten around
+to bundling up this latest toolchain into the pre-built file download on
+berlios?
+
+Are you using a linux environment? Or cygwin/windows? Since most of the
+developers here seem to use cygwin then if you are on linux you will
+find quite a few make errors (see my posts last month) but most (all?)
+of them can hacked around relatively easily. I just did a make in the
+tapcommander directory and even though I have the C++ compiler
+installed, it tripped up over many other problems which I did not bother
+to pursue. Good luck.
+
+Regards,
+
+-- 
+Mark Blakeney.
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000065.html">[TAP-devel] compiling TAPcommander
+</A></li>
+	<LI>Next message: <A HREF="000066.html">[TAP-devel] compiling TAPcommander
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#64">[ date ]</a>
+              <a href="thread.html#64">[ thread ]</a>
+              <a href="subject.html#64">[ subject ]</a>
+              <a href="author.html#64">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/tap-devel">More information about the TAP-devel
+mailing list</a><br>
+</body></html>

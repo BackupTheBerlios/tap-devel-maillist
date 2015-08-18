@@ -1,0 +1,399 @@
+From tap at twia.nl  Sat Feb 18 16:48:22 2006
+From: tap at twia.nl (=?iso-8859-1?Q?Dani=EBl_te_Winkel?=)
+Date: Sat, 18 Feb 2006 16:48:22 +0100
+Subject: [TAP-devel] Initialisation of pointers in global variables
+Message-ID: <NEBBIHFLADBKDAHKBMDIKELNBBAB.tap@twia.nl>
+
+Hi guys,
+
+In the manual for the TAP API 1.22, on page 12 and 13, Topfield say:
+
+Static initialized variables of the function pointer or the variable pointer
+cannot be permitted due to complier BUG.
+For example, the below pArray will not be initialize.
+	char pA[] = { 0, 1, 2, 3 };
+	char pB[] = { 4, 5, 6, 7 };
+
+	void *pArray[] =
+	{
+		pA,
+		pB,
+	};
+Also the member pointer of structure cannot be initialized in declaration
+part. In this case, you have to
+make the function to initialize the pointer variable.
+
+Is this an issue you can solve in your toolchain? Or is it really an issue
+in the TAP loader on the toppy itself.
+
+There is an object framework in C I would like to port to the toppy, but I
+can't do this now due to this bug.
+
+Cheers,
+
+Dani?l
+
+
+
+From robin_tap at rattus.homelinux.com  Sat Feb 18 21:46:32 2006
+From: robin_tap at rattus.homelinux.com (Robin Glover)
+Date: Sat, 18 Feb 2006 20:46:32 +0000
+Subject: [TAP-devel] Initialisation of pointers in global variables
+In-Reply-To: <NEBBIHFLADBKDAHKBMDIKELNBBAB.tap@twia.nl>
+References: <NEBBIHFLADBKDAHKBMDIKELNBBAB.tap@twia.nl>
+Message-ID: <43F787A8.8030501@rattus.homelinux.com>
+
+Hi Daniel,
+
+as you suggest it's a problem with the TAP loader on the toppy, which
+has no capability for proper relocation of the code. Most of the time it
+gets away with this due to the fact that the MIPS assembler is tweaked
+to use a relative addressing mode, so it doesn't matter where in memory
+the TAP is put because the offset between the instruction accessing the
+global data and the data itself is the same. In the case of pointers
+such as the example you give (or the function pointers in a c++ classes
+vtable) it doesn't work, since the assembly loads what it thinks is the
+address of the data or function from the variable, ends up with
+something pointing to near the beginning of memory space rather than in
+the body of the tap and dereferences/calls that. Reboot...
+
+For c++ we get around this by having code that adds _tap_base_address to
+each function pointer in the vtable of each class when the tap is
+loaded. This can be automated since you can dump the symbols in the .elf
+file and find the vtables (start with _vt$). Much harder for
+data/function pointer arrays - I suppose you could append _fixme to the
+name of each variable that needed fixing, so that you could find them in
+the name dump. Have a look at tap++.mk in the libc++utils folder (on
+berlios) to see how it's done for vtable function pointers.
+
+Robin
+
+Dani?l te Winkel wrote:
+> Hi guys,
+>
+> In the manual for the TAP API 1.22, on page 12 and 13, Topfield say:
+>
+> Static initialized variables of the function pointer or the variable pointer
+> cannot be permitted due to complier BUG.
+> For example, the below pArray will not be initialize.
+> 	char pA[] = { 0, 1, 2, 3 };
+> 	char pB[] = { 4, 5, 6, 7 };
+>
+> 	void *pArray[] =
+> 	{
+> 		pA,
+> 		pB,
+> 	};
+> Also the member pointer of structure cannot be initialized in declaration
+> part. In this case, you have to
+> make the function to initialize the pointer variable.
+>
+> Is this an issue you can solve in your toolchain? Or is it really an issue
+> in the TAP loader on the toppy itself.
+>
+> There is an object framework in C I would like to port to the toppy, but I
+> can't do this now due to this bug.
+>
+> Cheers,
+>
+> Dani?l
+>
+> _______________________________________________
+> TAP-devel mailing list
+> TAP-devel at lists.berlios.de
+> http://lists.berlios.de/mailman/listinfo/tap-devel
+>   
+
+
+From tap at twia.nl  Sun Feb 19 13:42:37 2006
+From: tap at twia.nl (=?iso-8859-1?Q?Dani=EBl_te_Winkel?=)
+Date: Sun, 19 Feb 2006 13:42:37 +0100
+Subject: [TAP-devel] Initialisation of pointers in global variables
+In-Reply-To: <43F787A8.8030501@rattus.homelinux.com>
+Message-ID: <NEBBIHFLADBKDAHKBMDIOELPBBAB.tap@twia.nl>
+
+Hi Robin,
+
+Thanks for your clear answer.
+
+Maybe a different route is possible? Can one postfix the global pointers
+based on the relocation and section info present in the tapfile itself,
+after the tap is loaded into memory. This asuming that one knows which tap
+is actually loaded, and for now ignoring the time added to the app's
+start-up)?
+Is would save the developer from prefixing or postfixing variables with a
+possible errors of forgetting or mistyping. It also may cover more areas in
+one go, such as the C++ vtables and pointers in C/C++ global variables.
+
+Dani?l
+
+-----Oorspronkelijk bericht-----
+Van: Robin Glover [mailto:robin_tap at rattus.homelinux.com]
+Verzonden: zaterdag 18 februari 2006 21:47
+Aan: Dani?l te Winkel
+CC: tap-devel at lists.berlios.de
+Onderwerp: Re: [TAP-devel] Initialisation of pointers in global
+variables
+
+
+Hi Daniel,
+
+as you suggest it's a problem with the TAP loader on the toppy, which
+has no capability for proper relocation of the code. Most of the time it
+gets away with this due to the fact that the MIPS assembler is tweaked
+to use a relative addressing mode, so it doesn't matter where in memory
+the TAP is put because the offset between the instruction accessing the
+global data and the data itself is the same. In the case of pointers
+such as the example you give (or the function pointers in a c++ classes
+vtable) it doesn't work, since the assembly loads what it thinks is the
+address of the data or function from the variable, ends up with
+something pointing to near the beginning of memory space rather than in
+the body of the tap and dereferences/calls that. Reboot...
+
+For c++ we get around this by having code that adds _tap_base_address to
+each function pointer in the vtable of each class when the tap is
+loaded. This can be automated since you can dump the symbols in the .elf
+file and find the vtables (start with _vt$). Much harder for
+data/function pointer arrays - I suppose you could append _fixme to the
+name of each variable that needed fixing, so that you could find them in
+the name dump. Have a look at tap++.mk in the libc++utils folder (on
+berlios) to see how it's done for vtable function pointers.
+
+Robin
+
+Dani?l te Winkel wrote:
+> Hi guys,
+>
+> In the manual for the TAP API 1.22, on page 12 and 13, Topfield say:
+>
+> Static initialized variables of the function pointer or the variable
+pointer
+> cannot be permitted due to complier BUG.
+> For example, the below pArray will not be initialize.
+> 	char pA[] = { 0, 1, 2, 3 };
+> 	char pB[] = { 4, 5, 6, 7 };
+>
+> 	void *pArray[] =
+> 	{
+> 		pA,
+> 		pB,
+> 	};
+> Also the member pointer of structure cannot be initialized in declaration
+> part. In this case, you have to
+> make the function to initialize the pointer variable.
+>
+> Is this an issue you can solve in your toolchain? Or is it really an issue
+> in the TAP loader on the toppy itself.
+>
+> There is an object framework in C I would like to port to the toppy, but I
+> can't do this now due to this bug.
+>
+> Cheers,
+>
+> Dani?l
+>
+> _______________________________________________
+> TAP-devel mailing list
+> TAP-devel at lists.berlios.de
+> http://lists.berlios.de/mailman/listinfo/tap-devel
+>
+
+
+
+From robin_tap at rattus.homelinux.com  Sun Feb 19 15:03:12 2006
+From: robin_tap at rattus.homelinux.com (Robin Glover)
+Date: Sun, 19 Feb 2006 14:03:12 +0000
+Subject: [TAP-devel] Initialisation of pointers in global variables
+In-Reply-To: <NEBBIHFLADBKDAHKBMDIOELPBBAB.tap@twia.nl>
+References: <NEBBIHFLADBKDAHKBMDIOELPBBAB.tap@twia.nl>
+Message-ID: <43F87AA0.6040301@rattus.homelinux.com>
+
+Hi Daniel,
+
+no, unfortunately there is no relocation information in the tap file. If
+you have a look at how the makefile works for building a tap, the last
+step is to do 'mips-objdump -o binary name.elf name.tap'. This step just
+forms a memory image of what the tap code would look like if it was
+loaded into memory at a base address of (I think) zero. All relocation
+information is discarded at this point.
+
+Of course I suppose you *could* try to write a tap that would act as a
+dynamic loader/relocater for other taps, but I imagine that it'd be more
+trouble than it was worth ;-)
+
+Robin
+
+Dani?l te Winkel wrote:
+> Hi Robin,
+>
+> Thanks for your clear answer.
+>
+> Maybe a different route is possible? Can one postfix the global pointers
+> based on the relocation and section info present in the tapfile itself,
+> after the tap is loaded into memory. This asuming that one knows which tap
+> is actually loaded, and for now ignoring the time added to the app's
+> start-up)?
+> Is would save the developer from prefixing or postfixing variables with a
+> possible errors of forgetting or mistyping. It also may cover more areas in
+> one go, such as the C++ vtables and pointers in C/C++ global variables.
+>
+> Dani?l
+>
+> -----Oorspronkelijk bericht-----
+> Van: Robin Glover [mailto:robin_tap at rattus.homelinux.com]
+> Verzonden: zaterdag 18 februari 2006 21:47
+> Aan: Dani?l te Winkel
+> CC: tap-devel at lists.berlios.de
+> Onderwerp: Re: [TAP-devel] Initialisation of pointers in global
+> variables
+>
+>
+> Hi Daniel,
+>
+> as you suggest it's a problem with the TAP loader on the toppy, which
+> has no capability for proper relocation of the code. Most of the time it
+> gets away with this due to the fact that the MIPS assembler is tweaked
+> to use a relative addressing mode, so it doesn't matter where in memory
+> the TAP is put because the offset between the instruction accessing the
+> global data and the data itself is the same. In the case of pointers
+> such as the example you give (or the function pointers in a c++ classes
+> vtable) it doesn't work, since the assembly loads what it thinks is the
+> address of the data or function from the variable, ends up with
+> something pointing to near the beginning of memory space rather than in
+> the body of the tap and dereferences/calls that. Reboot...
+>
+> For c++ we get around this by having code that adds _tap_base_address to
+> each function pointer in the vtable of each class when the tap is
+> loaded. This can be automated since you can dump the symbols in the .elf
+> file and find the vtables (start with _vt$). Much harder for
+> data/function pointer arrays - I suppose you could append _fixme to the
+> name of each variable that needed fixing, so that you could find them in
+> the name dump. Have a look at tap++.mk in the libc++utils folder (on
+> berlios) to see how it's done for vtable function pointers.
+>
+> Robin
+>
+> Dani?l te Winkel wrote:
+>   
+>> Hi guys,
+>>
+>> In the manual for the TAP API 1.22, on page 12 and 13, Topfield say:
+>>
+>> Static initialized variables of the function pointer or the variable
+>>     
+> pointer
+>   
+>> cannot be permitted due to complier BUG.
+>> For example, the below pArray will not be initialize.
+>> 	char pA[] = { 0, 1, 2, 3 };
+>> 	char pB[] = { 4, 5, 6, 7 };
+>>
+>> 	void *pArray[] =
+>> 	{
+>> 		pA,
+>> 		pB,
+>> 	};
+>> Also the member pointer of structure cannot be initialized in declaration
+>> part. In this case, you have to
+>> make the function to initialize the pointer variable.
+>>
+>> Is this an issue you can solve in your toolchain? Or is it really an issue
+>> in the TAP loader on the toppy itself.
+>>
+>> There is an object framework in C I would like to port to the toppy, but I
+>> can't do this now due to this bug.
+>>
+>> Cheers,
+>>
+>> Dani?l
+>>
+>> _______________________________________________
+>> TAP-devel mailing list
+>> TAP-devel at lists.berlios.de
+>> http://lists.berlios.de/mailman/listinfo/tap-devel
+>>
+>>     
+>
+> _______________________________________________
+> TAP-devel mailing list
+> TAP-devel at lists.berlios.de
+> http://lists.berlios.de/mailman/listinfo/tap-devel
+>   
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/tap-devel/attachments/20060219/4386c3fe/attachment.html>
+
+From robin_tap at rattus.homelinux.com  Wed Feb 22 22:33:37 2006
+From: robin_tap at rattus.homelinux.com (Robin Glover)
+Date: Wed, 22 Feb 2006 21:33:37 +0000
+Subject: [TAP-devel] C++ taps - support for virtual functions on templates
+Message-ID: <43FCD8B1.7080707@rattus.homelinux.com>
+
+Not sure if anyone other than Simon is using c++, but anyway...
+
+I've just checked in some changes to the c++ libraries in berlios, along
+with the tap++.mk makefile which allow you to compile c++ libraries and
+taps with the -frepo option enabled. The upshot of this is that you get
+one copy of each template instantiation globally rather than one per
+object file, meaning any template vtables are global rather than local
+variables and can be fixed up by the normal mechanism. It also might
+mean that c++ compiled code is a bit smaller.
+
+Unfortunately you need to apply the patch I've put at the end of this
+mail to the compiler to get -frepo to work in any meaningful manner, so
+the use of this option is currently disabled by default. If you apply
+the patch then you can enable it by uncommenting the line USE_FREPO=1 in
+tap++.mk. Even with the patch -frepo is somewhat broken - the makefile
+has to repeatedly try to link the code to get the templates to be
+instantiated. (Each time it brings in the template functions that it
+noticed were missing last time, but they might need other template
+functions, so round it goes again until it works). All this is handled
+automatically via the prelink.elf stage for taps, but you'd need to make
+any libraries depend on $(TEMPLATESBUILTFLAG) - see how libc++utils.a
+and libframework.a do it.
+
+Robin
+
+
+
+Patch (taken from http://gcc.gnu.org/ml/gcc-patches/2000-07/msg00159.html)
+
+--- gcc/tlink.c    Tue Oct 12 08:39:14 1999
++++ gcc/tlink.c    Thu Jul  6 02:22:53 2000
+@@ -27,6 +27,7 @@
+#include "demangle.h"
+#include "toplev.h"
+#include "collect2.h"
++#include "string.h"
+
+#define MAX_ITERATIONS 17
+
+@@ -639,6 +640,13 @@
+      demangled *dem = 0;
+      q = 0;
+
++      if ( strncmp(oldq, "In function ", sizeof("In function ")-1) == 0
+) {
++        sym=0;
++        if (tlink_verbose >= 2)
++          fprintf (stderr, "scan_linker_output: skipped: %s\n",oldq);
++      }
++      else {
++
+      /* First try \`GNU style'.  */
+      p = index (oldq, '\`');
+      if (p)
+@@ -660,6 +668,9 @@
+          sym = symbol_hash_lookup (p, false);
+        }
+        }
++
++      }
++
+    }
+
+      if (sym && sym->tweaked)
+
+
+
+

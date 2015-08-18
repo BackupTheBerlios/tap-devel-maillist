@@ -1,0 +1,32 @@
+From robin_tap at rattus.homelinux.com  Wed May 10 11:18:15 2006
+From: robin_tap at rattus.homelinux.com (Robin Glover)
+Date: Wed, 10 May 2006 10:18:15 +0100
+Subject: [TAP-devel] Breaking changes to the c++ framework library
+Message-ID: <4461AFD7.3060207@rattus.homelinux.com>
+
+Just a heads up to anyone using the 'framework' UI library (anyone apart
+from simonc?). I've checked in changes that reduce the widths of some
+variables used when there is no point in them being 32 bits - for
+example the height and width of windows on the UI is unlikely to need to
+be more than 32000 pixels...:-) This was largely done in the hope that
+fixing every compiler warning might lead me to an intermittent crash
+that's in there somewhere (which it didn't), but compiling with no
+warnings is good as it means you take notice of new ones that might be
+important.
+
+The most likely places that code using the library will need changing
+are the following:
+
+classes derived from ListItem that override DrawSubItem - the parameter
+types have changed - if you don't update the derived class the custom
+drawing code wont get called.
+
+classes derived from Decorator - the parameter types on all the virtual
+methods have changed, as above if you don't update the derived classes
+then you'll get the base class implementation.
+
+hope this doesn't cause too much pain.
+
+Robin
+
+

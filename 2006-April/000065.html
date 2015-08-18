@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [TAP-devel] compiling TAPcommander
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/tap-devel/2006-April/index.html" >
+   <LINK REL="made" HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20compiling%20TAPcommander&In-Reply-To=%3C44545742.5040805%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000063.html">
+   <LINK REL="Next"  HREF="000064.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[TAP-devel] compiling TAPcommander</H1>
+    <B>Alan Rick (gmail)</B> 
+    <A HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20compiling%20TAPcommander&In-Reply-To=%3C44545742.5040805%40gmail.com%3E"
+       TITLE="[TAP-devel] compiling TAPcommander">alanrick at gmail.com
+       </A><BR>
+    <I>Sun Apr 30 08:20:50 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000063.html">[TAP-devel] compiling TAPcommander
+</A></li>
+        <LI>Next message: <A HREF="000064.html">[TAP-devel] compiling TAPcommander
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#65">[ date ]</a>
+              <a href="thread.html#65">[ thread ]</a>
+              <a href="subject.html#65">[ subject ]</a>
+              <a href="author.html#65">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Robin,
+Thanks very much for replying.
+
+I tried this but failed. Here are the results (to be honest it's two 
+months ago that I initially installed the gcc environment and I can't 
+remember now how I did it - other than to follow the instructions on 
+toppy.co.org).:
+
+After downloading  the 1.1.tar.gz file this is what I did this morning.
+
+1.&gt; The gcc directories existed already so I renamed them.
+2. &gt; Extracted but couldn't find cccp.c mentioned on xwiki
+
+3.&gt; Couldn't find any reference to enable-language anywhere.
+
+4.&gt; Ran the routine to fix libtap.a and replaced it.
+
+Unfortunately I still get the same error (I wonder if it's just a path 
+thing). I also noticed that mips-g++.exe exists in three directories
+
+\usr\bin
+\usr\local\bin
+\usr\gcc_for_tap\local\bin
+
+but they're all the same size and date (23.05.2003 14:46)
+
+Any ideas?
+
+Alan 
+PS: I know C but not c++ (but I can read the code) and not this 
+development environment as you can see)
+
+Glover wrote:
+&gt;<i> Tap commander uses C++ and the compiler isn't in the standard toolchain
+</I>&gt;<i> that you download from berlios. You need to rebuild the toolchain with
+</I>&gt;<i> c++ enabled - rough instructions are here :
+</I>&gt;<i> <A HREF="http://toppy.xwiki.com/xwiki/bin/view/Main/writingcpptaps">http://toppy.xwiki.com/xwiki/bin/view/Main/writingcpptaps</A>
+</I>&gt;<i>
+</I>&gt;<i> Robin
+</I>&gt;<i>
+</I>&gt;<i> Alan Rickayzen wrote:
+</I>&gt;<i>   
+</I>&gt;&gt;<i> Hi experts,
+</I>&gt;&gt;<i> I was hoping to compile TAPcommander on berlios but I'm not sure how
+</I>&gt;&gt;<i> much time I'll have to invest.
+</I>&gt;&gt;<i> I followed the installation instructions and verified that
+</I>&gt;&gt;<i> freespacebar compiled (it did).
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> However with tapcomander I first had to manually create tap.c and now
+</I>&gt;&gt;<i> I get the error
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> make: /usr/local/topfield-gcc/bin/mips-g++: Command not found
+</I>&gt;&gt;<i> make: *** [TAPCommander.o] Error 127]
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> when I execute the build.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Have I taken on more than I can chew  :roll:  or is there a simple
+</I>&gt;&gt;<i> explanation?
+</I>&gt;&gt;<i> Thanks,
+</I>&gt;&gt;<i> Alan
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> TAP-devel mailing list
+</I>&gt;&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/tap-devel">TAP-devel at lists.berlios.de</A>
+</I>&gt;&gt;<i> <A HREF="http://lists.berlios.de/mailman/listinfo/tap-devel">http://lists.berlios.de/mailman/listinfo/tap-devel</A>
+</I>&gt;&gt;<i>     
+</I>&gt;<i>
+</I>&gt;<i>   
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000063.html">[TAP-devel] compiling TAPcommander
+</A></li>
+	<LI>Next message: <A HREF="000064.html">[TAP-devel] compiling TAPcommander
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#65">[ date ]</a>
+              <a href="thread.html#65">[ thread ]</a>
+              <a href="subject.html#65">[ subject ]</a>
+              <a href="author.html#65">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/tap-devel">More information about the TAP-devel
+mailing list</a><br>
+</body></html>

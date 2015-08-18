@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [TAP-devel] Detecting emulation at compile time
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/tap-devel/2005-December/index.html" >
+   <LINK REL="made" HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Detecting%20emulation%20at%20compile%20time&In-Reply-To=%3C43A49944.4010502%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000042.html">
+   <LINK REL="Next"  HREF="000044.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[TAP-devel] Detecting emulation at compile time</H1>
+    <B>Simon Capewell</B> 
+    <A HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Detecting%20emulation%20at%20compile%20time&In-Reply-To=%3C43A49944.4010502%40gmail.com%3E"
+       TITLE="[TAP-devel] Detecting emulation at compile time">simon.capewell at gmail.com
+       </A><BR>
+    <I>Sun Dec 18 00:03:32 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000042.html">[TAP-devel] Changes to libutils for emulator compile
+</A></li>
+        <LI>Next message: <A HREF="000044.html">[TAP-devel] Detecting emulation at compile time
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#43">[ date ]</a>
+              <a href="thread.html#43">[ thread ]</a>
+              <a href="subject.html#43">[ subject ]</a>
+              <a href="author.html#43">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Since we now have a Toppy emulator that runs under Windows there's a 
+need for certain code to #ifdef'ed out on the non Toppy platform, which 
+we're currently doing #ifdef WIN32. Obviously this macro wouldn't be 
+defined if you ever happen to develop a Mac or Linux based emulator, so 
+I'd like to add a target macro for the Toppy itself. Possible names are
+TOPPY
+TOPFIELD
+MIPS
+
+Anyone got any preferences or other suggestions?
+
+Simon
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000042.html">[TAP-devel] Changes to libutils for emulator compile
+</A></li>
+	<LI>Next message: <A HREF="000044.html">[TAP-devel] Detecting emulation at compile time
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#43">[ date ]</a>
+              <a href="thread.html#43">[ thread ]</a>
+              <a href="subject.html#43">[ subject ]</a>
+              <a href="author.html#43">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/tap-devel">More information about the TAP-devel
+mailing list</a><br>
+</body></html>

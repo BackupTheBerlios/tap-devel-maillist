@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [TAP-devel] Debug verses release
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/tap-devel/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Debug%20verses%20release&In-Reply-To=%3C434A896C.6040409%40urbanec.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000003.html">
+   <LINK REL="Next"  HREF="000005.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[TAP-devel] Debug verses release</H1>
+    <B>Peter Urbanec</B> 
+    <A HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Debug%20verses%20release&In-Reply-To=%3C434A896C.6040409%40urbanec.net%3E"
+       TITLE="[TAP-devel] Debug verses release">berlios at urbanec.net
+       </A><BR>
+    <I>Mon Oct 10 17:31:56 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000003.html">[TAP-devel] Debug verses release
+</A></li>
+        <LI>Next message: <A HREF="000005.html">[TAP-devel] Debug verses release
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4">[ date ]</a>
+              <a href="thread.html#4">[ thread ]</a>
+              <a href="subject.html#4">[ subject ]</a>
+              <a href="author.html#4">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Simon Capewell wrote:
+
+&gt;<i> Plus we need the corresponding defines added to the compiler command 
+</I>&gt;<i> line in tap.mak so that you can to a make using
+</I>&gt;<i> make all DEBUG=1
+</I>
+
+I enhanced the tap.mak file to pass a DEBUG argument to the compiler. 
+Usage is pretty simple, when you supply &quot;DEBUG=1&quot; as one of the 
+arguments to make, the gcc compiler will be invoked with the 
+preprocessor symbol DEBUG defined. You can use this idiom in your C code:
+
+#ifdef DEBUG
+/* Do things appropriate for DEBUG version of code. */
+#else
+/* Do things suitable for release version of code. */
+#endif
+
+For the time being, I would suggest that each TAP author uses their own 
+tracing macro, similar to what Simon suggested.
+
+I'd like to provide a fully fledged tracing facility as a library at a 
+later date. This library would have several severities so that the level 
+of detail can be adjusted as required. The tracing and debug code can be 
+included in shipping TAPs and turned on and off as required. The library 
+will also allow the messages to be directed to serial port or log files.
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000003.html">[TAP-devel] Debug verses release
+</A></li>
+	<LI>Next message: <A HREF="000005.html">[TAP-devel] Debug verses release
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4">[ date ]</a>
+              <a href="thread.html#4">[ thread ]</a>
+              <a href="subject.html#4">[ subject ]</a>
+              <a href="author.html#4">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/tap-devel">More information about the TAP-devel
+mailing list</a><br>
+</body></html>

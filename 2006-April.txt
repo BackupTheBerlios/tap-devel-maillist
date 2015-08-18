@@ -1,0 +1,220 @@
+From alanrick at gmail.com  Fri Apr 28 22:54:37 2006
+From: alanrick at gmail.com (Alan Rickayzen)
+Date: Fri, 28 Apr 2006 22:54:37 +0200
+Subject: [TAP-devel] compiling TAPcommander
+Message-ID: <ee7edba80604281354x3a810179xf8c54b9622261119@mail.gmail.com>
+
+Hi experts,
+I was hoping to compile TAPcommander on berlios but I'm not sure how
+much time I'll have to invest.
+I followed the installation instructions and verified that
+freespacebar compiled (it did).
+
+However with tapcomander I first had to manually create tap.c and now
+I get the error
+
+make: /usr/local/topfield-gcc/bin/mips-g++: Command not found
+make: *** [TAPCommander.o] Error 127]
+
+when I execute the build.
+
+Have I taken on more than I can chew  :roll:  or is there a simple explanation?
+Thanks,
+Alan
+
+
+From robin_tap at rattus.homelinux.com  Sat Apr 29 16:57:09 2006
+From: robin_tap at rattus.homelinux.com (Robin Glover)
+Date: Sat, 29 Apr 2006 15:57:09 +0100
+Subject: [TAP-devel] compiling TAPcommander
+In-Reply-To: <ee7edba80604281354x3a810179xf8c54b9622261119@mail.gmail.com>
+References: <ee7edba80604281354x3a810179xf8c54b9622261119@mail.gmail.com>
+Message-ID: <44537EC5.7070803@rattus.homelinux.com>
+
+Tap commander uses C++ and the compiler isn't in the standard toolchain
+that you download from berlios. You need to rebuild the toolchain with
+c++ enabled - rough instructions are here :
+http://toppy.xwiki.com/xwiki/bin/view/Main/writingcpptaps
+
+Robin
+
+Alan Rickayzen wrote:
+> Hi experts,
+> I was hoping to compile TAPcommander on berlios but I'm not sure how
+> much time I'll have to invest.
+> I followed the installation instructions and verified that
+> freespacebar compiled (it did).
+>
+> However with tapcomander I first had to manually create tap.c and now
+> I get the error
+>
+> make: /usr/local/topfield-gcc/bin/mips-g++: Command not found
+> make: *** [TAPCommander.o] Error 127]
+>
+> when I execute the build.
+>
+> Have I taken on more than I can chew  :roll:  or is there a simple
+> explanation?
+> Thanks,
+> Alan
+> _______________________________________________
+> TAP-devel mailing list
+> TAP-devel at lists.berlios.de
+> http://lists.berlios.de/mailman/listinfo/tap-devel
+
+
+From markb at berlios.de  Sun Apr 30 00:58:19 2006
+From: markb at berlios.de (Mark Blakeney)
+Date: Sun, 30 Apr 2006 08:58:19 +1000
+Subject: [TAP-devel] compiling TAPcommander
+In-Reply-To: <ee7edba80604281354x3a810179xf8c54b9622261119@mail.gmail.com>
+References: <ee7edba80604281354x3a810179xf8c54b9622261119@mail.gmail.com>
+Message-ID: <200604300858.19905.markb@berlios.de>
+
+On Saturday 29 April 2006 06:54, Alan Rickayzen wrote:
+> Hi experts, I was hoping to compile TAPcommander on berlios but I'm
+> not sure how much time I'll have to invest. I followed the
+> installation instructions and verified that freespacebar compiled (it
+> did).
+
+I'm not an expert (I've not yet written a line of TAP code yet) but I
+did download and install the C++ toolchain recently, see my posts from
+last months list archive. All the necessary C++ toolchain changes exist
+in svn so just checkout the toolchain directory, type make and make
+install, and you should have the C++ toolchain built up in
+/usr/local/topfield-gcc/. It just appears nobody has yet gotten around
+to bundling up this latest toolchain into the pre-built file download on
+berlios?
+
+Are you using a linux environment? Or cygwin/windows? Since most of the
+developers here seem to use cygwin then if you are on linux you will
+find quite a few make errors (see my posts last month) but most (all?)
+of them can hacked around relatively easily. I just did a make in the
+tapcommander directory and even though I have the C++ compiler
+installed, it tripped up over many other problems which I did not bother
+to pursue. Good luck.
+
+Regards,
+
+-- 
+Mark Blakeney.
+
+
+From alanrick at gmail.com  Sun Apr 30 08:20:50 2006
+From: alanrick at gmail.com (Alan Rick (gmail))
+Date: Sun, 30 Apr 2006 08:20:50 +0200
+Subject: [TAP-devel] compiling TAPcommander
+In-Reply-To: <44537EC5.7070803@rattus.homelinux.com>
+References: <ee7edba80604281354x3a810179xf8c54b9622261119@mail.gmail.com> <44537EC5.7070803@rattus.homelinux.com>
+Message-ID: <44545742.5040805@gmail.com>
+
+Hi Robin,
+Thanks very much for replying.
+
+I tried this but failed. Here are the results (to be honest it's two 
+months ago that I initially installed the gcc environment and I can't 
+remember now how I did it - other than to follow the instructions on 
+toppy.co.org).:
+
+After downloading  the 1.1.tar.gz file this is what I did this morning.
+
+1.> The gcc directories existed already so I renamed them.
+2. > Extracted but couldn't find cccp.c mentioned on xwiki
+
+3.> Couldn't find any reference to enable-language anywhere.
+
+4.> Ran the routine to fix libtap.a and replaced it.
+
+Unfortunately I still get the same error (I wonder if it's just a path 
+thing). I also noticed that mips-g++.exe exists in three directories
+
+\usr\bin
+\usr\local\bin
+\usr\gcc_for_tap\local\bin
+
+but they're all the same size and date (23.05.2003 14:46)
+
+Any ideas?
+
+Alan 
+PS: I know C but not c++ (but I can read the code) and not this 
+development environment as you can see)
+
+Glover wrote:
+> Tap commander uses C++ and the compiler isn't in the standard toolchain
+> that you download from berlios. You need to rebuild the toolchain with
+> c++ enabled - rough instructions are here :
+> http://toppy.xwiki.com/xwiki/bin/view/Main/writingcpptaps
+>
+> Robin
+>
+> Alan Rickayzen wrote:
+>   
+>> Hi experts,
+>> I was hoping to compile TAPcommander on berlios but I'm not sure how
+>> much time I'll have to invest.
+>> I followed the installation instructions and verified that
+>> freespacebar compiled (it did).
+>>
+>> However with tapcomander I first had to manually create tap.c and now
+>> I get the error
+>>
+>> make: /usr/local/topfield-gcc/bin/mips-g++: Command not found
+>> make: *** [TAPCommander.o] Error 127]
+>>
+>> when I execute the build.
+>>
+>> Have I taken on more than I can chew  :roll:  or is there a simple
+>> explanation?
+>> Thanks,
+>> Alan
+>> _______________________________________________
+>> TAP-devel mailing list
+>> TAP-devel at lists.berlios.de
+>> http://lists.berlios.de/mailman/listinfo/tap-devel
+>>     
+>
+>   
+
+
+
+From alanrick at gmail.com  Sun Apr 30 09:35:13 2006
+From: alanrick at gmail.com (Alan Rickayzen)
+Date: Sun, 30 Apr 2006 09:35:13 +0200
+Subject: [TAP-devel] compiling TAPcommander
+In-Reply-To: <200604300858.19905.markb@berlios.de>
+References: <ee7edba80604281354x3a810179xf8c54b9622261119@mail.gmail.com>
+	 <200604300858.19905.markb@berlios.de>
+Message-ID: <ee7edba80604300035k5948f30fw993cd850402236c7@mail.gmail.com>
+
+On 4/30/06, Mark Blakeney <markb at berlios.de> wrote:
+
+> I'm not an expert (I've not yet written a line of TAP code yet) but I
+> did download and install the C++ toolchain recently, see my posts from
+> last months list archive. All the necessary C++ toolchain changes exist
+> in svn so just checkout the toolchain directory, type make and make
+> install, and you should have the C++ toolchain built up in
+> /usr/local/topfield-gcc/. ...
+>
+> Are you using a linux environment? Or cygwin/windows?
+> I just did a make in the
+> tapcommander directory and even though I have the C++ compiler
+> installed, it tripped up over many other problems which I did not bother
+> to pursue.
+
+Hi Mark, Robin,
+
+Thanks  for your response. I am using cygwin windows but, for example,
+I don't even know in which directory I should run the make and make
+install and then I'll have to solve the TAPcommander compile issues.
+And then there's the matter of grappling with c++ when I only know C.
+
+My only interest was producing a slightly modified tap but I now
+realise that I am out of my depth.
+
+So please forgive me if I gracefully retire from this and thank you
+again for all your help,
+
+Alan
+
+

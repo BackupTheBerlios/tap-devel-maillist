@@ -1,0 +1,253 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [TAP-devel] Debug verses release
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/tap-devel/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Debug%20verses%20release&In-Reply-To=%3C%21%7E%21UENERkVCMDkAAQACAAAAAAAAAAAAAAAAABgAAAAAAAAAMNWg5S5sPkK9Sfw7gR60h8KAAAAQAAAANtmTDpjdtke7DTaDVSsCdAEAAAAA%40bigpond.net.au%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000004.html">
+   <LINK REL="Next"  HREF="000006.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[TAP-devel] Debug verses release</H1>
+    <B>tonymy01</B> 
+    <A HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Debug%20verses%20release&In-Reply-To=%3C%21%7E%21UENERkVCMDkAAQACAAAAAAAAAAAAAAAAABgAAAAAAAAAMNWg5S5sPkK9Sfw7gR60h8KAAAAQAAAANtmTDpjdtke7DTaDVSsCdAEAAAAA%40bigpond.net.au%3E"
+       TITLE="[TAP-devel] Debug verses release">tony_h at bigpond.net.au
+       </A><BR>
+    <I>Mon Oct 10 23:45:53 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000004.html">[TAP-devel] Debug verses release
+</A></li>
+        <LI>Next message: <A HREF="000006.html">[TAP-devel] ShowMessagewin
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5">[ date ]</a>
+              <a href="thread.html#5">[ thread ]</a>
+              <a href="subject.html#5">[ subject ]</a>
+              <a href="author.html#5">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I hope the email doesn't fritz the formatting...
+Here is my logf routine that I use like printf in my epg_uploader tap, I
+don't have any printfs in the whole code and always choose logf.
+This will log to file the formatted string if the &quot;log&quot; is greater or equal
+to the global log level &quot;g_loglevel&quot;, and always printf to serial (I made
+this later mod to my last release of epg_uploader so I can continue logging
+via serial while away in canada all messages using microcom on the slug
+without logging to the Toppy HDD, it used to only log if greater than or
+equal to the global log level), but with a few subtle mods to this you could
+easily put an ifdef DEBUG to control the printfs.    You could even set the
+global level with
+
+#ifdef DEBUG
+g_loglevel=5
+#else
+g_loglevel=3
+#endif
+Or something like this if you wish.
+Call it like logf(4,&quot;A string:%s var:d&quot;,stringsample,variablesample);
+
+It supports %x %d %s %f and 
+also %02d and %04d (the only two formatted decimal integers I use in
+epg_uploader).
+
+void logf(int log,unsigned char *fmt, ...)
+{
+	word mjd;
+	byte hour,min,sec;
+	word year;
+	byte month, day, weekDay;
+	va_list args;
+	unsigned char *p,*sval;
+	int ival;
+	double dval;
+	static unsigned char sprintfile[10240]; //since it is such a large
+chunk, will make static
+	unsigned char str1[300];
+	unsigned char str2[300];
+	int i,j;
+	int idx=0;
+	int num_items=0;
+	int filelength;
+	TYPE_File* fp;
+
+	if (log&lt;=g_loglevel)
+	{
+		memset(sprintfile,0,sizeof sprintfile);
+
+		if (!TAP_Hdd_Exist(LOG_FILE)) {
+			TAP_Hdd_Create(LOG_FILE,ATTR_NORMAL);
+		}
+
+		if (( fp = TAP_Hdd_Fopen( LOG_FILE) ))
+		{
+			filelength=TAP_Hdd_Flen( fp );
+			if (filelength!=0 &amp;&amp; (filelength%512)==0)
+filelength+=512;  //FRIGGIN TOPFIELD BUG! flen is 512bytes out if the
+filesize is a multiple of 512.
+			if (filelength&gt;sizeof sprintfile) filelength=sizeof
+sprintfile;
+			TAP_Hdd_Fread( sprintfile, filelength, 1, fp );
+		}
+		else //logfile can't be opened
+			if (TAP_GetSystemVar(SYSVAR_OsdLan)==LAN_German)
+				ShowMessageWin(&quot;kann nicht ge&#246;ffnet werden
+file&quot;, LOG_FILE,150);
+			else
+				ShowMessageWin(&quot;can't open file&quot;,
+LOG_FILE,150);
+	}
+
+	TAP_GetTime( &amp;mjd, &amp;hour, &amp;min, &amp;sec);
+	TAP_ExtractMjd(mjd, &amp;year, &amp;month, &amp;day, &amp;weekDay );
+
+	sprintf(str1,&quot;%04d/%02d/%02d
+%02d:%02d:%02d-&quot;,year,month,day,hour,min,sec);
+	va_start(args,fmt);
+	for (p=fmt;*p;p++){
+		if(*p!='%'){
+			sprintf(str2,&quot;%c&quot;,*p);
+			strcat(str1,str2);
+			continue;
+		}
+		switch(*++p){
+			case 'd':
+				ival=va_arg(args,int);
+				sprintf(str2,&quot;%d&quot;,ival);
+				strcat(str1,str2);
+				break;
+			case 'f':
+				dval=va_arg(args,double);
+				sprintf(str2,&quot;%f&quot;,dval);
+				strcat(str1,str2);
+				break;
+			case 's':
+				for (sval = va_arg(args,unsigned char *);
+*sval; sval++)
+				{
+					sprintf(str2,&quot;%c&quot;,*sval);
+					strcat(str1,str2);
+				}
+				break;
+			case 'x':
+				ival=va_arg(args,int);
+				sprintf(str2,&quot;%x&quot;,ival);
+				strcat(str1,str2);
+				break;
+			case '0':  //works for %02/04d
+				ival=va_arg(args,int);
+				if (*++p=='4')	 sprintf(str2,&quot;%04d&quot;,ival);
+				else sprintf(str2,&quot;%02d&quot;,ival);
+				*++p;
+				strcat(str1,str2);
+				break;
+
+			default:
+				sprintf(str2,&quot;%c&quot;,*p);
+				strcat(str1,str2);
+				break;
+		}
+	}
+	va_end(args);
+
+	sprintf(str2,&quot;\r\n&quot;);
+	strcat(str1,str2);
+	printf(&quot;%s&quot;,str1);
+
+	if (log&lt;=g_loglevel &amp;&amp; fp)
+	{
+		if ((strlen(str1)+strlen(sprintfile))&gt;sizeof sprintfile)
+		{
+			//printf(&quot;log file greater now\n&quot;);
+			memmove(sprintfile,sprintfile+strlen(str1),sizeof
+sprintfile-strlen(str1));
+			memset(sprintfile+sizeof
+sprintfile-strlen(str1),0,strlen(str1));
+		}
+		strcat(sprintfile,str1);
+		TAP_Hdd_Fclose( fp );
+		fp = TAP_Hdd_Fopen( LOG_FILE);
+		TAP_Hdd_Fwrite( sprintfile,sizeof sprintfile,1,fp);
+		TAP_Hdd_Fclose( fp );
+	}
+}
+
+Cheers
+Tonymy01
+<A HREF="http://tonyspage.abock.de">http://tonyspage.abock.de</A> for Topfield Information
+ 
+
+
+-----Original Message-----
+From: <A HREF="https://lists.berlios.de/mailman/listinfo/tap-devel">tap-devel-admin at berlios.de</A> [mailto:<A HREF="https://lists.berlios.de/mailman/listinfo/tap-devel">tap-devel-admin at berlios.de</A>] On
+Behalf Of Peter Urbanec
+Sent: Tuesday, 11 October 2005 1:32 AM
+To: <A HREF="https://lists.berlios.de/mailman/listinfo/tap-devel">tap-devel at lists.berlios.de</A>
+Subject: Re: [TAP-devel] Debug verses release
+
+
+Simon Capewell wrote:
+
+&gt;<i> Plus we need the corresponding defines added to the compiler command 
+</I>&gt;<i> line in tap.mak so that you can to a make using
+</I>&gt;<i> make all DEBUG=1
+</I>
+
+I enhanced the tap.mak file to pass a DEBUG argument to the compiler. 
+Usage is pretty simple, when you supply &quot;DEBUG=1&quot; as one of the 
+arguments to make, the gcc compiler will be invoked with the 
+preprocessor symbol DEBUG defined. You can use this idiom in your C code:
+
+#ifdef DEBUG
+/* Do things appropriate for DEBUG version of code. */
+#else
+/* Do things suitable for release version of code. */
+#endif
+
+For the time being, I would suggest that each TAP author uses their own 
+tracing macro, similar to what Simon suggested.
+
+I'd like to provide a fully fledged tracing facility as a library at a 
+later date. This library would have several severities so that the level 
+of detail can be adjusted as required. The tracing and debug code can be 
+included in shipping TAPs and turned on and off as required. The library 
+will also allow the messages to be directed to serial port or log files.
+
+_______________________________________________
+TAP-devel mailing list
+<A HREF="https://lists.berlios.de/mailman/listinfo/tap-devel">TAP-devel at lists.berlios.de</A>
+<A HREF="http://lists.berlios.de/mailman/listinfo/tap-devel">http://lists.berlios.de/mailman/listinfo/tap-devel</A>
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000004.html">[TAP-devel] Debug verses release
+</A></li>
+	<LI>Next message: <A HREF="000006.html">[TAP-devel] ShowMessagewin
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5">[ date ]</a>
+              <a href="thread.html#5">[ thread ]</a>
+              <a href="subject.html#5">[ subject ]</a>
+              <a href="author.html#5">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/tap-devel">More information about the TAP-devel
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [TAP-devel] Use of srand(), rand()
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/tap-devel/2006-January/index.html" >
+   <LINK REL="made" HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Use%20of%20srand%28%29%2C%20rand%28%29&In-Reply-To=%3CD395BFB7BC08B84987AC60473CFFD92D743274%40readingex.reading.workplace-systems.plc.uk%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000051.html">
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[TAP-devel] Use of srand(), rand()</H1>
+    <B>Riley, Mark</B> 
+    <A HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Use%20of%20srand%28%29%2C%20rand%28%29&In-Reply-To=%3CD395BFB7BC08B84987AC60473CFFD92D743274%40readingex.reading.workplace-systems.plc.uk%3E"
+       TITLE="[TAP-devel] Use of srand(), rand()">mark.riley at wpmail.com
+       </A><BR>
+    <I>Fri Jan 20 15:17:25 CET 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000051.html">[TAP-devel] Use of srand(), rand()
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#52">[ date ]</a>
+              <a href="thread.html#52">[ thread ]</a>
+              <a href="subject.html#52">[ subject ]</a>
+              <a href="author.html#52">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Cheers for the info Robin,
+ 
+Not sure I am up to disassembling the code, but I think I will follow your
+suggestion of finding alternate random generation instead. Unfortunately
+using rand() on its own also causes a crash.
+ 
+Mark
+ 
+-----Original Message-----
+From: Robin Glover [mailto:<A HREF="https://lists.berlios.de/mailman/listinfo/tap-devel">robin.glover at dsl.pipex.com</A>] 
+Sent: 19 January 2006 21:07
+To: Riley, Mark
+Cc: '<A HREF="https://lists.berlios.de/mailman/listinfo/tap-devel">tap-devel at lists.berlios.de</A>'
+Subject: Re: [TAP-devel] Use of srand(), rand()
+ 
+If you wan't to work out how the compiler has broken it I'd suggest creating
+a TAP that does this (and only this) in its tap main, compile it both ways
+and run 'mips-objdump -d' (dissassemble) on the .elf files and see how they
+differ. I'd guess the problem lies in the implementation of srand in libc,
+not in the call to it. I'd even go so far as to speculate that it might be
+an integer overflow exception (MIPS has 2 types of arithmetic functions, one
+sort throws exceptions on overflow and the other doesnt - maybe the new
+compiler is using the wrong one?).
+
+If you just want random numbers, don't worry about srand(), just call rand()
+and xor the results with something like the current MJD and the current tick
+count. Alternatively you can probably find rand/srand implementations on the
+web and try coding your own to see if that fares any better.
+
+Robin
+
+Riley, Mark wrote: 
+Hi guys,
+ 
+When I call the srand() function 
+ 
+e.g. srand(TAP_GetTick());
+ 
+it crashes the Toppy. This function appears to work ok when compiled using
+the original Topfield supplied gcc.
+ 
+Anyone got any ideas as to why this would be?
+ 
+Cheers,
+ 
+Mark
+
+________________________________________________________________________
+This e-mail has been scanned for all viruses by Star. The
+service is powered by MessageLabs. For more information on a proactive
+anti-virus service working around the clock, around the globe, visit:
+<A HREF="http://www.star.net.uk">http://www.star.net.uk</A> &lt;<A HREF="http://www.star.net.uk">http://www.star.net.uk</A>&gt; 
+________________________________________________________________________
+
+________________________________________________________________________
+This e-mail has been scanned for all viruses by Star. The
+service is powered by MessageLabs. For more information on a proactive
+anti-virus service working around the clock, around the globe, visit:
+<A HREF="http://www.star.net.uk">http://www.star.net.uk</A>
+________________________________________________________________________
+
+
+________________________________________________________________________
+This e-mail has been scanned for all viruses by Star. The
+service is powered by MessageLabs. For more information on a proactive
+anti-virus service working around the clock, around the globe, visit:
+<A HREF="http://www.star.net.uk">http://www.star.net.uk</A>
+________________________________________________________________________
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="https://lists.berlios.de/pipermail/tap-devel/attachments/20060120/cea8f395/attachment.html">https://lists.berlios.de/pipermail/tap-devel/attachments/20060120/cea8f395/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000051.html">[TAP-devel] Use of srand(), rand()
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#52">[ date ]</a>
+              <a href="thread.html#52">[ thread ]</a>
+              <a href="subject.html#52">[ subject ]</a>
+              <a href="author.html#52">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/tap-devel">More information about the TAP-devel
+mailing list</a><br>
+</body></html>

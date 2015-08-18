@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [TAP-devel] C++ - fixing v-table problems
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/tap-devel/2005-December/index.html" >
+   <LINK REL="made" HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20C%2B%2B%20-%20fixing%20v-table%20problems&In-Reply-To=%3C43935A9E.5040907%40rattus.homelinux.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000029.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[TAP-devel] C++ - fixing v-table problems</H1>
+    <B>Robin Glover</B> 
+    <A HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20C%2B%2B%20-%20fixing%20v-table%20problems&In-Reply-To=%3C43935A9E.5040907%40rattus.homelinux.com%3E"
+       TITLE="[TAP-devel] C++ - fixing v-table problems">robin_tap at rattus.homelinux.com
+       </A><BR>
+    <I>Sun Dec  4 22:07:42 CET 2005</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000029.html">[TAP-devel] C++ - fixing v-table problems
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28">[ date ]</a>
+              <a href="thread.html#28">[ thread ]</a>
+              <a href="subject.html#28">[ subject ]</a>
+              <a href="author.html#28">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I have successfully made virtual function calls work on the topfield by 
+fixing up the v-tables of each class with virtual functions using the 
+following code. The problem seems to be that the function pointers 
+inside the v-table are not being adjusted for the tap base address when 
+the tap loads into memory. The code performs this adjustment, and should 
+be called for each class with virtual functions, probably at the start 
+of your TAP_Main.
+
+Note that you still have to provide custom operator new &amp; delete for 
+each class. There seems to be a broken global operator new inside 
+libtap.a which prevents you from simply defining global implementations. 
+I also have to add -fno-weak to the g++ command line to avoid every 
+single class member call from crashing the topfield due to double 
+counting the address offset of the call destination from the tap base 
+address.
+
+Robin
+
+
+struct vtableItem
+{
+    unsigned short offs1;
+    unsigned short offs2;
+    unsigned long fnPtr;
+};
+
+struct vtable
+{
+    vtableItem preamble;
+    vtableItem items[];
+};
+
+template &lt;typename T&gt; void FixupVTable()
+{
+    T object;
+    char* objPtr = (char*) &object;
+    objPtr += sizeof(T) - 4; // the pointer to the v-table seems to be 
+at the end of the object
+
+    vtable* pVtable = *((vtable**)objPtr);
+
+    // preamble has always been zero (so far), so if it doesn't look 
+right, we give up
+    if (pVtable-&gt;preamble.offs1 != 0)
+        return;
+
+    if (pVtable-&gt;preamble.offs2 != 0)
+        return;
+
+    if (pVtable-&gt;preamble.fnPtr != 0)
+        return;
+
+    for (int i=0; i&lt;1000; i++) // can increase if you have &gt; 1000 
+virtual functions!
+    {
+        vtableItem&amp; item = pVtable-&gt;items[i];
+        if (item.fnPtr &gt; 0x200000 ) // a 2mb tap? no, surely not. This 
+pointer probably already adjusted
+            continue;
+
+        if (item.fnPtr == 0) // the compiler inserts 8 bytes of 0's at 
+end of vtable - when we hit that we can stop
+            break; // that's all folks
+
+        item.fnPtr += _tap_startAddr;
+    }
+}
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000029.html">[TAP-devel] C++ - fixing v-table problems
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28">[ date ]</a>
+              <a href="thread.html#28">[ thread ]</a>
+              <a href="subject.html#28">[ subject ]</a>
+              <a href="author.html#28">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/tap-devel">More information about the TAP-devel
+mailing list</a><br>
+</body></html>

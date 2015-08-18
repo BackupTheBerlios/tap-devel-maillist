@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [TAP-devel] Initialisation of pointers in global variables
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/tap-devel/2006-February/index.html" >
+   <LINK REL="made" HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Initialisation%20of%20pointers%20in%20global%20variables&In-Reply-To=%3CNEBBIHFLADBKDAHKBMDIKELNBBAB.tap%40twia.nl%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000054.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[TAP-devel] Initialisation of pointers in global variables</H1>
+    <B>Dani&#235;l te Winkel</B> 
+    <A HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Initialisation%20of%20pointers%20in%20global%20variables&In-Reply-To=%3CNEBBIHFLADBKDAHKBMDIKELNBBAB.tap%40twia.nl%3E"
+       TITLE="[TAP-devel] Initialisation of pointers in global variables">tap at twia.nl
+       </A><BR>
+    <I>Sat Feb 18 16:48:22 CET 2006</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000054.html">[TAP-devel] Initialisation of pointers in global variables
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#53">[ date ]</a>
+              <a href="thread.html#53">[ thread ]</a>
+              <a href="subject.html#53">[ subject ]</a>
+              <a href="author.html#53">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi guys,
+
+In the manual for the TAP API 1.22, on page 12 and 13, Topfield say:
+
+Static initialized variables of the function pointer or the variable pointer
+cannot be permitted due to complier BUG.
+For example, the below pArray will not be initialize.
+	char pA[] = { 0, 1, 2, 3 };
+	char pB[] = { 4, 5, 6, 7 };
+
+	void *pArray[] =
+	{
+		pA,
+		pB,
+	};
+Also the member pointer of structure cannot be initialized in declaration
+part. In this case, you have to
+make the function to initialize the pointer variable.
+
+Is this an issue you can solve in your toolchain? Or is it really an issue
+in the TAP loader on the toppy itself.
+
+There is an object framework in C I would like to port to the toppy, but I
+can't do this now due to this bug.
+
+Cheers,
+
+Dani&#235;l
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000054.html">[TAP-devel] Initialisation of pointers in global variables
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#53">[ date ]</a>
+              <a href="thread.html#53">[ thread ]</a>
+              <a href="subject.html#53">[ subject ]</a>
+              <a href="author.html#53">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/tap-devel">More information about the TAP-devel
+mailing list</a><br>
+</body></html>

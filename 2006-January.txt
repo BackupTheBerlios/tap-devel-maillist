@@ -1,0 +1,180 @@
+From mark.riley at wpmail.com  Thu Jan 19 15:09:04 2006
+From: mark.riley at wpmail.com (Riley, Mark)
+Date: Thu, 19 Jan 2006 14:09:04 -0000
+Subject: [TAP-devel] Use of srand(), rand()
+Message-ID: <D395BFB7BC08B84987AC60473CFFD92D743269@readingex.reading.workplace-systems.plc.uk>
+
+Hi guys,
+ 
+When I call the srand() function 
+ 
+e.g. srand(TAP_GetTick());
+ 
+it crashes the Toppy. This function appears to work ok when compiled using
+the original Topfield supplied gcc.
+ 
+Anyone got any ideas as to why this would be?
+ 
+Cheers,
+ 
+Mark
+
+
+________________________________________________________________________
+This e-mail has been scanned for all viruses by Star. The
+service is powered by MessageLabs. For more information on a proactive
+anti-virus service working around the clock, around the globe, visit:
+http://www.star.net.uk
+________________________________________________________________________
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/tap-devel/attachments/20060119/e18e1d58/attachment.html>
+
+From robin_tap at rattus.homelinux.com  Thu Jan 19 22:10:56 2006
+From: robin_tap at rattus.homelinux.com (Robin Glover)
+Date: Thu, 19 Jan 2006 21:10:56 +0000
+Subject: [TAP-devel] Use of srand(), rand()
+In-Reply-To: <D395BFB7BC08B84987AC60473CFFD92D743269@readingex.reading.workplace-systems.plc.uk>
+References: <D395BFB7BC08B84987AC60473CFFD92D743269@readingex.reading.workplace-systems.plc.uk>
+Message-ID: <43D00060.6070307@rattus.homelinux.com>
+
+If you wan't to work out how the compiler has broken it I'd suggest
+creating a TAP that does this (and only this) in its tap main, compile
+it both ways and run 'mips-objdump -d' (dissassemble) on the .elf files
+and see how they differ. I'd guess the problem lies in the
+implementation of srand in libc, not in the call to it. I'd even go so
+far as to speculate that it might be an integer overflow exception (MIPS
+has 2 types of arithmetic functions, one sort throws exceptions on
+overflow and the other doesnt - maybe the new compiler is using the
+wrong one?).
+
+If you just want random numbers, don't worry about srand(), just call
+rand() and xor the results with something like the current MJD and the
+current tick count. Alternatively you can probably find rand/srand
+implementations on the web and try coding your own to see if that fares
+any better.
+
+Robin
+
+ps - list moderators, please ignore the identical post to this that I
+sent from the wrong address (again...) I really must stop doing that :-(
+
+Riley, Mark wrote:
+
+> Hi guys,
+>
+>  
+>
+> When I call the srand() function
+>
+>  
+>
+> e.g. srand(TAP_GetTick());
+>
+>  
+>
+> it crashes the Toppy. This function appears to work ok when compiled
+> using the original Topfield supplied gcc.
+>
+>  
+>
+> Anyone got any ideas as to why this would be?
+>
+>  
+>
+> Cheers,
+>
+>  
+>
+> Mark
+>
+>
+> ________________________________________________________________________
+> This e-mail has been scanned for all viruses by Star. The
+> service is powered by MessageLabs. For more information on a proactive
+> anti-virus service working around the clock, around the globe, visit:
+> http://www.star.net.uk
+> ________________________________________________________________________
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/tap-devel/attachments/20060119/2a355172/attachment.html>
+
+From mark.riley at wpmail.com  Fri Jan 20 15:17:25 2006
+From: mark.riley at wpmail.com (Riley, Mark)
+Date: Fri, 20 Jan 2006 14:17:25 -0000
+Subject: [TAP-devel] Use of srand(), rand()
+Message-ID: <D395BFB7BC08B84987AC60473CFFD92D743274@readingex.reading.workplace-systems.plc.uk>
+
+Cheers for the info Robin,
+ 
+Not sure I am up to disassembling the code, but I think I will follow your
+suggestion of finding alternate random generation instead. Unfortunately
+using rand() on its own also causes a crash.
+ 
+Mark
+ 
+-----Original Message-----
+From: Robin Glover [mailto:robin.glover at dsl.pipex.com] 
+Sent: 19 January 2006 21:07
+To: Riley, Mark
+Cc: 'tap-devel at lists.berlios.de'
+Subject: Re: [TAP-devel] Use of srand(), rand()
+ 
+If you wan't to work out how the compiler has broken it I'd suggest creating
+a TAP that does this (and only this) in its tap main, compile it both ways
+and run 'mips-objdump -d' (dissassemble) on the .elf files and see how they
+differ. I'd guess the problem lies in the implementation of srand in libc,
+not in the call to it. I'd even go so far as to speculate that it might be
+an integer overflow exception (MIPS has 2 types of arithmetic functions, one
+sort throws exceptions on overflow and the other doesnt - maybe the new
+compiler is using the wrong one?).
+
+If you just want random numbers, don't worry about srand(), just call rand()
+and xor the results with something like the current MJD and the current tick
+count. Alternatively you can probably find rand/srand implementations on the
+web and try coding your own to see if that fares any better.
+
+Robin
+
+Riley, Mark wrote: 
+Hi guys,
+ 
+When I call the srand() function 
+ 
+e.g. srand(TAP_GetTick());
+ 
+it crashes the Toppy. This function appears to work ok when compiled using
+the original Topfield supplied gcc.
+ 
+Anyone got any ideas as to why this would be?
+ 
+Cheers,
+ 
+Mark
+
+________________________________________________________________________
+This e-mail has been scanned for all viruses by Star. The
+service is powered by MessageLabs. For more information on a proactive
+anti-virus service working around the clock, around the globe, visit:
+http://www.star.net.uk <http://www.star.net.uk> 
+________________________________________________________________________
+
+________________________________________________________________________
+This e-mail has been scanned for all viruses by Star. The
+service is powered by MessageLabs. For more information on a proactive
+anti-virus service working around the clock, around the globe, visit:
+http://www.star.net.uk
+________________________________________________________________________
+
+
+________________________________________________________________________
+This e-mail has been scanned for all viruses by Star. The
+service is powered by MessageLabs. For more information on a proactive
+anti-virus service working around the clock, around the globe, visit:
+http://www.star.net.uk
+________________________________________________________________________
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/tap-devel/attachments/20060120/cea8f395/attachment.html>
+

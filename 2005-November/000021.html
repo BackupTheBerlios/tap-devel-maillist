@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [TAP-devel] Tools to be used as part of a build
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/tap-devel/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Tools%20to%20be%20used%20as%20part%20of%20a%20build&In-Reply-To=%3C438D203A.2090204%40urbanec.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000020.html">
+   <LINK REL="Next"  HREF="000022.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[TAP-devel] Tools to be used as part of a build</H1>
+    <B>Peter Urbanec</B> 
+    <A HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Tools%20to%20be%20used%20as%20part%20of%20a%20build&In-Reply-To=%3C438D203A.2090204%40urbanec.net%3E"
+       TITLE="[TAP-devel] Tools to be used as part of a build">berlios at urbanec.net
+       </A><BR>
+    <I>Wed Nov 30 04:44:58 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000020.html">[TAP-devel] Tools to be used as part of a build
+</A></li>
+        <LI>Next message: <A HREF="000022.html">[TAP-devel] C++ - what am I missing?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21">[ date ]</a>
+              <a href="thread.html#21">[ thread ]</a>
+              <a href="subject.html#21">[ subject ]</a>
+              <a href="author.html#21">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Simon Capewell wrote:
+
+&gt;<i>Where's the best place to put source for tools that will be referenced
+</I>&gt;<i>from a makefile? Should these become part of the toolchain?
+</I>&gt;<i>I have a command line bitmap to pixmap converter that would be useful as
+</I>&gt;<i>part of a build process.
+</I>&gt;<i>
+</I>
+That depends on the exact details. If the code is portable and will work 
+on all supported platforms without unreasonable dependencies, it can 
+become part of the build process. In that case, it can go into 
+trunk/tools/toolname
+
+On the other hand, if the tool is platform specific, it should go into 
+trunk/host/platform/toolname, but it should not be a required component 
+for anything that is not specific to that platform. For example, if you 
+have a bitmap converter for Win32 only, it can only be used for projects 
+in trunk/host/Win32.
+
+If your tool is platform specific, but generates files that can still be 
+used to build on other platforms, you should add the generated files to 
+the repository. For example, if the hypothetical bitmap converter tool 
+generates bitmap.c for use in mytap, you should add the generated 
+bitmap.c to the trunk/taps/mytap directory. This will allow people on 
+platforms other than Win32 to build the TAP.
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000020.html">[TAP-devel] Tools to be used as part of a build
+</A></li>
+	<LI>Next message: <A HREF="000022.html">[TAP-devel] C++ - what am I missing?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21">[ date ]</a>
+              <a href="thread.html#21">[ thread ]</a>
+              <a href="subject.html#21">[ subject ]</a>
+              <a href="author.html#21">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/tap-devel">More information about the TAP-devel
+mailing list</a><br>
+</body></html>

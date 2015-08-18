@@ -1,0 +1,19 @@
+From klaffkas at yahoo.com  Tue Oct 30 14:51:09 2007
+From: klaffkas at yahoo.com (Kristina Laffkas)
+Date: Tue, 30 Oct 2007 06:51:09 -0700 (PDT)
+Subject: [TAP-devel] problem with checking out project
+Message-ID: <568113.53717.qm@web84005.mail.mud.yahoo.com>
+
+Hi,
+   I am a new user and I'm having issues checking out
+the tap project, because I'm behind a firewall that I
+can't change.  Is there any way that I could get a
+secure login so that I can use
+https://svn.berlios.de/svnroot/repos/tap/trunk instead
+of http:
+    If not, is there any other way that I can download
+the project instead of doing a checkout?
+    Thank you in advance,
+        Kristina
+
+

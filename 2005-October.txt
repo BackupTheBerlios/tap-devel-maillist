@@ -1,0 +1,697 @@
+From berlios at urbanec.net  Sat Oct  1 17:48:49 2005
+From: berlios at urbanec.net (Peter Urbanec)
+Date: Sun, 02 Oct 2005 01:48:49 +1000
+Subject: [TAP-devel] TAP Project gets a new home page.
+Message-ID: <433EAFE1.9030801@urbanec.net>
+
+The TAP project just received a new home page. The new page should make 
+it easier to find relevant information. The new project page is a lot 
+simpler than the project summary page and contains links to all the 
+important resources.
+
+http://tap.berlios.de/
+
+Please use the above URL when referring to the project.
+
+
+
+From simon.capewell at gmail.com  Fri Oct  7 01:54:03 2005
+From: simon.capewell at gmail.com (Simon Capewell)
+Date: Fri, 07 Oct 2005 00:54:03 +0100
+Subject: [TAP-devel] toolchain troubles
+Message-ID: <4345B91B.6080205@gmail.com>
+
+These 2 files seem to have cr/lf pairs in them 
+C:\cygwin\usr\local\topfield-gcc\lib\gcc-lib\mips\2.95.2\include\stddef.h
+C:\cygwin\usr\local\topfield-gcc\mips\include\sys\config.h
+
+I'm getting error running mips-gcc in the win32 toolchain. It seems to 
+be calling mips-as which is falling over with the following
+
+/usr/local/topfield-gcc/bin/mips-gcc -mqnxpic -fno-delayed-branch 
+-mlong-calls -msoft-float -isystem 
+/usr/local/topfield-gcc/topfield-sdk/include -O2 
+-I../../libs/TSRCommander   -c -o VirtualRemote.o VirtualRemote.c
+Assembler messages:
+  for reading: No such file or directory
+': No such file or directoryem, cannot exec `
+make: *** [VirtualRemote.o] Error 1
+
+VirtualRemote.o isn't being created and I'm getting an a.out file instead.
+
+Any suggestions?
+
+
+
+
+From berlios at urbanec.net  Fri Oct  7 09:12:32 2005
+From: berlios at urbanec.net (Peter Urbanec)
+Date: Fri, 07 Oct 2005 17:12:32 +1000
+Subject: [TAP-devel] toolchain troubles
+In-Reply-To: <4345B91B.6080205@gmail.com>
+References: <4345B91B.6080205@gmail.com>
+Message-ID: <43461FE0.8040705@urbanec.net>
+
+Simon Capewell wrote:
+
+> These 2 files seem to have cr/lf pairs in them 
+> C:\cygwin\usr\local\topfield-gcc\lib\gcc-lib\mips\2.95.2\include\stddef.h
+> C:\cygwin\usr\local\topfield-gcc\mips\include\sys\config.h
+
+
+I've just checked the binary distribution of the 1.1 toolchain, as 
+downloaded from BerliOS and can find no evidence of this.
+
+> I'm getting error running mips-gcc in the win32 toolchain. It seems to 
+> be calling mips-as which is falling over with the following
+>
+> /usr/local/topfield-gcc/bin/mips-gcc -mqnxpic -fno-delayed-branch 
+> -mlong-calls -msoft-float -isystem 
+> /usr/local/topfield-gcc/topfield-sdk/include -O2 
+> -I../../libs/TSRCommander   -c -o VirtualRemote.o VirtualRemote.c
+> Assembler messages:
+>  for reading: No such file or directory
+> ': No such file or directoryem, cannot exec `
+> make: *** [VirtualRemote.o] Error 1
+>
+> VirtualRemote.o isn't being created and I'm getting an a.out file 
+> instead.
+>
+> Any suggestions?
+
+
+It sounds like your installation is somehow corrupted. Perhaps you used 
+a Windows utility, like winzip, to unpack the toolchain and it may have 
+corrupted some of the files.
+
+Can you please follow all the instructions available at 
+http://tap.berlios.de/docs.html ? I recently added instructions for 
+binary toolchain installation/upgrade.
+
+When I follow the instruction published on the website, it all works for me:
+
+peteru at rofl ~
+$ *cd **projects/tap/trunk/taps/VirtualRemote*
+
+peteru at rofl ~/projects/tap/trunk/taps/VirtualRemote
+$ *make clean*
+rm -f *.tap *.o *.elf
+
+peteru at rofl ~/projects/tap/trunk/taps/VirtualRemote
+$ *make*
+/usr/local/topfield-gcc/bin/mips-gcc -mqnxpic -fno-delayed-branch 
+-mlong-calls -msoft-float -isystem 
+/usr/local/topfield-gcc/topfield-sdk/include -O2 
+-I../../libs/TSRCommander   -c -o VirtualRemote.o VirtualRemote.c
+/usr/local/topfield-gcc/bin/mips-ld --script 
+/usr/local/topfield-gcc/mips/lib/tap.ld VirtualRemote.o 
+-L/usr/local/topfield-gcc/topfield-sdk/lib -ltap -lc -lm  -o 
+VirtualRemote.elf
+/usr/local/topfield-gcc/bin/mips-objcopy -O binary VirtualRemote.elf 
+VirtualRemote.tap
+rm VirtualRemote.o VirtualRemote.elf
+
+
+
+
+From simon.capewell at gmail.com  Sun Oct  9 00:54:26 2005
+From: simon.capewell at gmail.com (Simon Capewell)
+Date: Sat, 08 Oct 2005 23:54:26 +0100
+Subject: [TAP-devel] Debug verses release
+Message-ID: <43484E22.3090806@gmail.com>
+
+Hi all,
+
+I've been thinking about defining a more standardized debug and release 
+environment. We all use TAP_Print to output debug information, but I 
+don't think I've yet seen any TAP source that attempts to strip these 
+out for proper releases. I'd suggest we have a debug library or perhaps 
+a module in libutils to achieve this. To begin with it only needs to be 
+a header that defines a few macros:
+
+#ifdef DEBUG
+void TRACE( char* format, ...)
+{
+	va_args handler to pass on to TAP_Print
+}
+#else
+#define TRACE  1 ? (void)0 : TRACE
+#endif
+
+Plus we need the corresponding defines added to the compiler command 
+line in tap.mak so that you can to a make using
+make all DEBUG=1
+make all NDEBUG=1
+
+I'm having to brush of my 10 year dormant makefile skills (which were in 
+a different format anyway). Does anyone less rusty know the standard way 
+of doing this?
+
+One other makefile suggestion for those using Windows. Define a target 
+called 'copy' thus:
+# Copy files to the Toppy using tfcopy
+copy: all
+	tfcopy *.tap '#:\ProgramFiles\'
+then running  make copy DEBUG=1  will build and copy to toppy!
+
+Simon
+
+
+
+From berlios at urbanec.net  Mon Oct 10 17:31:56 2005
+From: berlios at urbanec.net (Peter Urbanec)
+Date: Tue, 11 Oct 2005 01:31:56 +1000
+Subject: [TAP-devel] Debug verses release
+In-Reply-To: <43484E22.3090806@gmail.com>
+References: <43484E22.3090806@gmail.com>
+Message-ID: <434A896C.6040409@urbanec.net>
+
+Simon Capewell wrote:
+
+> Plus we need the corresponding defines added to the compiler command 
+> line in tap.mak so that you can to a make using
+> make all DEBUG=1
+
+
+I enhanced the tap.mak file to pass a DEBUG argument to the compiler. 
+Usage is pretty simple, when you supply "DEBUG=1" as one of the 
+arguments to make, the gcc compiler will be invoked with the 
+preprocessor symbol DEBUG defined. You can use this idiom in your C code:
+
+#ifdef DEBUG
+/* Do things appropriate for DEBUG version of code. */
+#else
+/* Do things suitable for release version of code. */
+#endif
+
+For the time being, I would suggest that each TAP author uses their own 
+tracing macro, similar to what Simon suggested.
+
+I'd like to provide a fully fledged tracing facility as a library at a 
+later date. This library would have several severities so that the level 
+of detail can be adjusted as required. The tracing and debug code can be 
+included in shipping TAPs and turned on and off as required. The library 
+will also allow the messages to be directed to serial port or log files.
+
+
+
+From tony_h at bigpond.net.au  Mon Oct 10 23:45:53 2005
+From: tony_h at bigpond.net.au (tonymy01)
+Date: Tue, 11 Oct 2005 07:45:53 +1000
+Subject: [TAP-devel] Debug verses release
+In-Reply-To: <434A896C.6040409@urbanec.net>
+Message-ID: <!~!UENERkVCMDkAAQACAAAAAAAAAAAAAAAAABgAAAAAAAAAMNWg5S5sPkK9Sfw7gR60h8KAAAAQAAAANtmTDpjdtke7DTaDVSsCdAEAAAAA@bigpond.net.au>
+
+I hope the email doesn't fritz the formatting...
+Here is my logf routine that I use like printf in my epg_uploader tap, I
+don't have any printfs in the whole code and always choose logf.
+This will log to file the formatted string if the "log" is greater or equal
+to the global log level "g_loglevel", and always printf to serial (I made
+this later mod to my last release of epg_uploader so I can continue logging
+via serial while away in canada all messages using microcom on the slug
+without logging to the Toppy HDD, it used to only log if greater than or
+equal to the global log level), but with a few subtle mods to this you could
+easily put an ifdef DEBUG to control the printfs.    You could even set the
+global level with
+
+#ifdef DEBUG
+g_loglevel=5
+#else
+g_loglevel=3
+#endif
+Or something like this if you wish.
+Call it like logf(4,"A string:%s var:d",stringsample,variablesample);
+
+It supports %x %d %s %f and 
+also %02d and %04d (the only two formatted decimal integers I use in
+epg_uploader).
+
+void logf(int log,unsigned char *fmt, ...)
+{
+	word mjd;
+	byte hour,min,sec;
+	word year;
+	byte month, day, weekDay;
+	va_list args;
+	unsigned char *p,*sval;
+	int ival;
+	double dval;
+	static unsigned char sprintfile[10240]; //since it is such a large
+chunk, will make static
+	unsigned char str1[300];
+	unsigned char str2[300];
+	int i,j;
+	int idx=0;
+	int num_items=0;
+	int filelength;
+	TYPE_File* fp;
+
+	if (log<=g_loglevel)
+	{
+		memset(sprintfile,0,sizeof sprintfile);
+
+		if (!TAP_Hdd_Exist(LOG_FILE)) {
+			TAP_Hdd_Create(LOG_FILE,ATTR_NORMAL);
+		}
+
+		if (( fp = TAP_Hdd_Fopen( LOG_FILE) ))
+		{
+			filelength=TAP_Hdd_Flen( fp );
+			if (filelength!=0 && (filelength%512)==0)
+filelength+=512;  //FRIGGIN TOPFIELD BUG! flen is 512bytes out if the
+filesize is a multiple of 512.
+			if (filelength>sizeof sprintfile) filelength=sizeof
+sprintfile;
+			TAP_Hdd_Fread( sprintfile, filelength, 1, fp );
+		}
+		else //logfile can't be opened
+			if (TAP_GetSystemVar(SYSVAR_OsdLan)==LAN_German)
+				ShowMessageWin("kann nicht ge?ffnet werden
+file", LOG_FILE,150);
+			else
+				ShowMessageWin("can't open file",
+LOG_FILE,150);
+	}
+
+	TAP_GetTime( &mjd, &hour, &min, &sec);
+	TAP_ExtractMjd(mjd, &year, &month, &day, &weekDay );
+
+	sprintf(str1,"%04d/%02d/%02d
+%02d:%02d:%02d-",year,month,day,hour,min,sec);
+	va_start(args,fmt);
+	for (p=fmt;*p;p++){
+		if(*p!='%'){
+			sprintf(str2,"%c",*p);
+			strcat(str1,str2);
+			continue;
+		}
+		switch(*++p){
+			case 'd':
+				ival=va_arg(args,int);
+				sprintf(str2,"%d",ival);
+				strcat(str1,str2);
+				break;
+			case 'f':
+				dval=va_arg(args,double);
+				sprintf(str2,"%f",dval);
+				strcat(str1,str2);
+				break;
+			case 's':
+				for (sval = va_arg(args,unsigned char *);
+*sval; sval++)
+				{
+					sprintf(str2,"%c",*sval);
+					strcat(str1,str2);
+				}
+				break;
+			case 'x':
+				ival=va_arg(args,int);
+				sprintf(str2,"%x",ival);
+				strcat(str1,str2);
+				break;
+			case '0':  //works for %02/04d
+				ival=va_arg(args,int);
+				if (*++p=='4')	 sprintf(str2,"%04d",ival);
+				else sprintf(str2,"%02d",ival);
+				*++p;
+				strcat(str1,str2);
+				break;
+
+			default:
+				sprintf(str2,"%c",*p);
+				strcat(str1,str2);
+				break;
+		}
+	}
+	va_end(args);
+
+	sprintf(str2,"\r\n");
+	strcat(str1,str2);
+	printf("%s",str1);
+
+	if (log<=g_loglevel && fp)
+	{
+		if ((strlen(str1)+strlen(sprintfile))>sizeof sprintfile)
+		{
+			//printf("log file greater now\n");
+			memmove(sprintfile,sprintfile+strlen(str1),sizeof
+sprintfile-strlen(str1));
+			memset(sprintfile+sizeof
+sprintfile-strlen(str1),0,strlen(str1));
+		}
+		strcat(sprintfile,str1);
+		TAP_Hdd_Fclose( fp );
+		fp = TAP_Hdd_Fopen( LOG_FILE);
+		TAP_Hdd_Fwrite( sprintfile,sizeof sprintfile,1,fp);
+		TAP_Hdd_Fclose( fp );
+	}
+}
+
+Cheers
+Tonymy01
+http://tonyspage.abock.de for Topfield Information
+ 
+
+
+-----Original Message-----
+From: tap-devel-admin at berlios.de [mailto:tap-devel-admin at berlios.de] On
+Behalf Of Peter Urbanec
+Sent: Tuesday, 11 October 2005 1:32 AM
+To: tap-devel at lists.berlios.de
+Subject: Re: [TAP-devel] Debug verses release
+
+
+Simon Capewell wrote:
+
+> Plus we need the corresponding defines added to the compiler command 
+> line in tap.mak so that you can to a make using
+> make all DEBUG=1
+
+
+I enhanced the tap.mak file to pass a DEBUG argument to the compiler. 
+Usage is pretty simple, when you supply "DEBUG=1" as one of the 
+arguments to make, the gcc compiler will be invoked with the 
+preprocessor symbol DEBUG defined. You can use this idiom in your C code:
+
+#ifdef DEBUG
+/* Do things appropriate for DEBUG version of code. */
+#else
+/* Do things suitable for release version of code. */
+#endif
+
+For the time being, I would suggest that each TAP author uses their own 
+tracing macro, similar to what Simon suggested.
+
+I'd like to provide a fully fledged tracing facility as a library at a 
+later date. This library would have several severities so that the level 
+of detail can be adjusted as required. The tracing and debug code can be 
+included in shipping TAPs and turned on and off as required. The library 
+will also allow the messages to be directed to serial port or log files.
+
+_______________________________________________
+TAP-devel mailing list
+TAP-devel at lists.berlios.de
+http://lists.berlios.de/mailman/listinfo/tap-devel
+
+
+
+
+From simon.capewell at gmail.com  Tue Oct 11 21:48:22 2005
+From: simon.capewell at gmail.com (Simon Capewell)
+Date: Tue, 11 Oct 2005 20:48:22 +0100
+Subject: [TAP-devel] ShowMessagewin
+Message-ID: <434C1706.2080006@gmail.com>
+
+Anyone got any objections to this being part of libutils? It's already 
+in the samples for libutils and I've seen it used in a fair number of 
+other TAPs.
+
+
+From berlios at urbanec.net  Wed Oct 12 02:33:08 2005
+From: berlios at urbanec.net (Peter Urbanec)
+Date: Wed, 12 Oct 2005 10:33:08 +1000
+Subject: [TAP-devel] ShowMessagewin
+In-Reply-To: <434C1706.2080006@gmail.com>
+References: <434C1706.2080006@gmail.com>
+Message-ID: <434C59C4.7000900@urbanec.net>
+
+Simon Capewell wrote:
+
+> Anyone got any objections to this being part of libutils? It's already 
+> in the samples for libutils and I've seen it used in a fair number of 
+> other TAPs. 
+
+
+That seems like a good idea. A quick inspection reveals that each TAP 
+has a different implementation of this function. For example, 
+timer_extend includes serial debug output, whereas freespacebar does 
+not. ViewMaster3 does not use the delay argument and the two TAPs 
+mentioned above implement delay handling in very different ways.
+
+If you are going into the effort, it would be nice to come up with an 
+implementation that can be reused in all those TAPs. At the same time, 
+you probably want the API to be as simple as possible.
+
+
+
+From berlios at urbanec.net  Thu Oct 13 03:32:44 2005
+From: berlios at urbanec.net (Peter Urbanec)
+Date: Thu, 13 Oct 2005 11:32:44 +1000
+Subject: [TAP-devel] ShowMessagewin
+In-Reply-To: <434D4C59.4020906@gmail.com>
+References: <434C1706.2080006@gmail.com> <434C59C4.7000900@urbanec.net> <434D4C59.4020906@gmail.com>
+Message-ID: <434DB93C.8030604@urbanec.net>
+
+Simon Capewell wrote:
+
+> To start with I'll do a version that:
+> Outputs the text to the serial port in debug mode
+> Uses TAP_Delay
+>
+> It'll be part of libutils in files called MessageWin unless you'd all 
+> prefer lower case filenames.
+
+
+Sounds fine to get the ball rolling. We can always improve things later. 
+Normally the convention is to use the above capitalisation for C++ 
+classes. Given that a) there's not much C++ TAP code out there and b) 
+we're all unpaid volunteers, I won't play the code police. :-)
+
+Good library documentation is important. Making use of Doxygen would be 
+nice, however I think that asking authors to learn the Doxygen 
+commenting style is probably going too far. I suspect that most 
+participants have never seen a lot of these industrial strength software 
+development tools and the learning curve is probably already pushing the 
+envelope. If you know Doxygen, or JavaDoc, please make use of it, but 
+don't lose sleep over it.
+
+BTW: In order to reply to the mailing list, you should use "Reply All" 
+instead of just "Reply", otherwise the message will be a private reply, 
+sent only to the original poster.
+
+
+
+From simon.capewell at techop.co.uk  Thu Oct 13 11:43:43 2005
+From: simon.capewell at techop.co.uk (Simon Capewell)
+Date: Thu, 13 Oct 2005 10:43:43 +0100
+Subject: [TAP-devel] ShowMessagewin
+Message-ID: <DDC4030CDAE9EA4882EB2A24DC17F9B63025B7@zen.techop.local>
+
+Reply to all. I knew there had to be a way!
+
+Mmmmm, C++. Yes please! I had limited success with the Topfield C++
+compiler, the biggest problem being getting the TAP_PROGRAM_NAME macros
+to be recognised.
+
+C++ makes it somewhat easier to reuse components IMO. Mainly though I'd
+rant about the following C 'features'
+1. Having to do typedef struct _tagStructName { } StructName all over
+the place
+2  Variable declarations always at the top. Aaaaaarg. The number of
+times I've bunged a TAP_Print in at the top of a function and then had
+the compiler fall down.
+3. No function overloading
+4. No default parameters
+
+If anyone is working on getting the C++ compiler working I'd be
+extremely grateful just to get these 4 items! Given that we don't have
+access to a full C standard library, I think that the lack of STL isn't
+an issue.
+
+Doxygen seems like a good idea. I've had a look at the doxygen site
+http://www.stack.nl/~dimitri/doxygen/index.html, are you familiar with
+using doxygen? Are there any quickstart commenting guides or crib sheets
+for it?
+
+-----Original Message-----
+From: Peter Urbanec [mailto:berlios at urbanec.net] 
+Sent: 13 October 2005 02:33
+To: Simon Capewell; tap-devel at lists.berlios.de
+Subject: Re: [TAP-devel] ShowMessagewin
+
+Simon Capewell wrote:
+
+> To start with I'll do a version that:
+> Outputs the text to the serial port in debug mode Uses TAP_Delay
+>
+> It'll be part of libutils in files called MessageWin unless you'd all 
+> prefer lower case filenames.
+
+
+Sounds fine to get the ball rolling. We can always improve things later.
+
+Normally the convention is to use the above capitalisation for C++
+classes. Given that a) there's not much C++ TAP code out there and b)
+we're all unpaid volunteers, I won't play the code police. :-)
+
+Good library documentation is important. Making use of Doxygen would be
+nice, however I think that asking authors to learn the Doxygen
+commenting style is probably going too far. I suspect that most
+participants have never seen a lot of these industrial strength software
+development tools and the learning curve is probably already pushing the
+envelope. If you know Doxygen, or JavaDoc, please make use of it, but
+don't lose sleep over it.
+
+BTW: In order to reply to the mailing list, you should use "Reply All" 
+instead of just "Reply", otherwise the message will be a private reply,
+sent only to the original poster.
+
+
+
+From berlios at urbanec.net  Sun Oct 16 11:18:28 2005
+From: berlios at urbanec.net (Peter Urbanec)
+Date: Sun, 16 Oct 2005 19:18:28 +1000
+Subject: [TAP-devel] ShowMessagewin
+In-Reply-To: <DDC4030CDAE9EA4882EB2A24DC17F9B63025B7@zen.techop.local>
+References: <DDC4030CDAE9EA4882EB2A24DC17F9B63025B7@zen.techop.local>
+Message-ID: <43521AE4.7080006@urbanec.net>
+
+Simon Capewell wrote:
+
+>Mmmmm, C++. Yes please! I had limited success with the Topfield C++
+>compiler, the biggest problem being getting the TAP_PROGRAM_NAME macros
+>to be recognised.
+>  
+>
+
+I have the C++ compiler built, but have not tested it yet. I will test 
+with a C++ TAP from SteveB, when I get a minute. His trick to making the 
+TAP_ID macros work was to put them in a separate C file and link the TAP 
+from multiple C/C++ object files. This seems to work fairly well if you 
+use the standard convention of having a pair of .h/.cpp files per public 
+class.
+
+The problem with C++ is that some of the "behind the scenes mechanisms" 
+for handling C++ features can bite you if the compiler settings used for 
+the firmware don't match those used in TAPs.
+
+I will report back to the list once I had a chance to test the C++ compiler.
+
+
+
+From berlios at urbanec.net  Mon Oct 17 18:01:03 2005
+From: berlios at urbanec.net (Peter Urbanec)
+Date: Tue, 18 Oct 2005 02:01:03 +1000
+Subject: [TAP-devel] C++ code
+Message-ID: <4353CABF.7020501@urbanec.net>
+
+I found a few hours to try and get the C++ compiler working.
+
+The Good News.
+--------------
+Building a C++ toolchain is easy. A couple of trivial changes in the 
+toolchain Makefile is all that is required.
+
+I have a simple C++ test program that compiles and runs without crashing 
+the Toppy.
+
+It's possible to write an entire TAP in a single C++ file. There's no 
+need to put the Topfield TAP_ID, et. al. macros into a separate C file, 
+which was apparently required with the original Topfield compiler.
+
+
+The Bad News.
+-------------
+It looks like virtual functions don't work.
+
+There is no default implementation of operator new or operator delete. 
+Classes must implement these operators as calls to TAP_MemAlloc() and 
+TAP_MemFree().
+
+There is no implementation of the Standard C++ library.
+
+
+The Verdict.
+------------
+If you are a C++ programmer and expect to make use of "standard" C++, 
+you will be disappointed.
+If you are a C programmer and would like a little bit of C++ syntactic 
+sugar, this will do just fine.
+
+
+Unless there is a lot of demand to have C++ support included as a 
+standard feature in the toolchain, I won't be committing the C++ support 
+very soon. It would require a new binary release of the toolchain, which 
+is something I'd prefer not to do frivolously. Of course, I am happy to 
+oblige if there *is* sufficient demand.
+
+Cheers,
+
+    Peter Urbanec
+
+
+
+From simon.capewell at gmail.com  Tue Oct 18 01:36:29 2005
+From: simon.capewell at gmail.com (Simon Capewell)
+Date: Tue, 18 Oct 2005 00:36:29 +0100
+Subject: [TAP-devel] C++ code
+In-Reply-To: <4353CABF.7020501@urbanec.net>
+References: <4353CABF.7020501@urbanec.net>
+Message-ID: <4354357D.1080404@gmail.com>
+
+I'd say go for it. If nothing else, it'll make inserting ad-hoc 
+debugging statements a lot easier. What we would also get is:
+1. Overloaded functions
+2. Default parameters
+3. Ability to add methods to structures.
+
+If anyone steps outside the boundaries of what works they'll soon find out!
+
+The Topfield compiler didn't do virtual functions either - I  tried and 
+got nothing but crashes, it's probably to do with vtable pointers not 
+being initialized when a TAP loads, similar to the problems with char* 
+arrays.
+
+
+Peter Urbanec wrote:
+> I found a few hours to try and get the C++ compiler working.
+> 
+> The Good News.
+> --------------
+> Building a C++ toolchain is easy. A couple of trivial changes in the 
+> toolchain Makefile is all that is required.
+> 
+> I have a simple C++ test program that compiles and runs without crashing 
+> the Toppy.
+> 
+> It's possible to write an entire TAP in a single C++ file. There's no 
+> need to put the Topfield TAP_ID, et. al. macros into a separate C file, 
+> which was apparently required with the original Topfield compiler.
+> 
+> 
+> The Bad News.
+> -------------
+> It looks like virtual functions don't work.
+> 
+> There is no default implementation of operator new or operator delete. 
+> Classes must implement these operators as calls to TAP_MemAlloc() and 
+> TAP_MemFree().
+> 
+> There is no implementation of the Standard C++ library.
+> 
+> 
+> The Verdict.
+> ------------
+> If you are a C++ programmer and expect to make use of "standard" C++, 
+> you will be disappointed.
+> If you are a C programmer and would like a little bit of C++ syntactic 
+> sugar, this will do just fine.
+> 
+> 
+> Unless there is a lot of demand to have C++ support included as a 
+> standard feature in the toolchain, I won't be committing the C++ support 
+> very soon. It would require a new binary release of the toolchain, which 
+> is something I'd prefer not to do frivolously. Of course, I am happy to 
+> oblige if there *is* sufficient demand.
+> 
+> Cheers,
+> 
+>    Peter Urbanec
+> 
+> _______________________________________________
+> TAP-devel mailing list
+> TAP-devel at lists.berlios.de
+> http://lists.berlios.de/mailman/listinfo/tap-devel
+> 
+
+

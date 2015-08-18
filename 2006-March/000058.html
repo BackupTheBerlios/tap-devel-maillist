@@ -1,0 +1,107 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [TAP-devel] Build errors in toolchain
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/tap-devel/2006-March/index.html" >
+   <LINK REL="made" HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Build%20errors%20in%20toolchain&In-Reply-To=%3C200603161046.29180.markb%40users.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000059.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[TAP-devel] Build errors in toolchain</H1>
+    <B>Mark Blakeney</B> 
+    <A HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Build%20errors%20in%20toolchain&In-Reply-To=%3C200603161046.29180.markb%40users.berlios.de%3E"
+       TITLE="[TAP-devel] Build errors in toolchain">markb at berlios.de
+       </A><BR>
+    <I>Thu Mar 16 01:46:28 CET 2006</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000059.html">[TAP-devel] Build errors in toolchain
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#58">[ date ]</a>
+              <a href="thread.html#58">[ thread ]</a>
+              <a href="subject.html#58">[ subject ]</a>
+              <a href="author.html#58">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi,
+
+I'm new to TAP development and have just joined this list.
+
+I have tried to build the TAP toolchain but get errors and I am hoping
+somebody here can help me. I am building the toolchain because I would
+like to start experimenting with tap development but use C++ (I've read
+all the appropriate posts here). However, the built-up toolchain
+downloadable from the site has not been made with the
+enable-languages=c,c++ option in the Makefile (although I see simonc
+added it to the svn copy on 21-Dec-05).
+
+I use a current Debian sid distribution which uses gcc v4.0.3 as the
+default. One problem I immediately encountered were various compile
+errors which I found were due to the toolchain requiring gcc v3. The
+Makefile should probably specify this (or add the appropriate options on
+gcc v4).
+
+After this, the toolchain seems to build but fails in the taptest build
+with the following:
+
+Building taptest
+make -C taptest
+make[1]: Entering directory 
+`/home/mark/Data/toppy/berlios/svn/trunk/tools/toolchain/taptest'
+gcc-3.4 -nostartfiles -T /usr/local/topfield-gcc/mips/lib/tap.ld  
+-Wl,-Map,menulibc.map -o menulibc.elf menulibc.o 
+-L/usr/local/topfield-gcc/topfield-sdk/lib -ltap -lc -lm
+/usr/bin/ld: target elf32-bigmips not found
+collect2: ld returned 1 exit status
+make[1]: *** [menulibc.elf] Error 1
+make[1]: Leaving directory 
+`/home/mark/Data/toppy/berlios/svn/trunk/tools/toolchain/taptest'
+make: *** [taptest/.built] Error 2
+
+I have tried various hacks to overcome this without success. I think
+that the target should now be something like elf32-tradbigmips
+(traditional big mips)?
+
+Does anybody know what the problem is? (note I get the same error if I
+build the toolchain source download rather than the svn tree).
+
+Regards,
+
+-- 
+Mark Blakeney.
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000059.html">[TAP-devel] Build errors in toolchain
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#58">[ date ]</a>
+              <a href="thread.html#58">[ thread ]</a>
+              <a href="subject.html#58">[ subject ]</a>
+              <a href="author.html#58">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/tap-devel">More information about the TAP-devel
+mailing list</a><br>
+</body></html>

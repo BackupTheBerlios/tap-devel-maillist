@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [TAP-devel] C++ taps - support for virtual functions on templates
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/tap-devel/2006-February/index.html" >
+   <LINK REL="made" HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20C%2B%2B%20taps%20-%20support%20for%20virtual%20functions%20on%20templates&In-Reply-To=%3C43FCD8B1.7080707%40rattus.homelinux.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000056.html">
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[TAP-devel] C++ taps - support for virtual functions on templates</H1>
+    <B>Robin Glover</B> 
+    <A HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20C%2B%2B%20taps%20-%20support%20for%20virtual%20functions%20on%20templates&In-Reply-To=%3C43FCD8B1.7080707%40rattus.homelinux.com%3E"
+       TITLE="[TAP-devel] C++ taps - support for virtual functions on templates">robin_tap at rattus.homelinux.com
+       </A><BR>
+    <I>Wed Feb 22 22:33:37 CET 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000056.html">[TAP-devel] Initialisation of pointers in global variables
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#57">[ date ]</a>
+              <a href="thread.html#57">[ thread ]</a>
+              <a href="subject.html#57">[ subject ]</a>
+              <a href="author.html#57">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Not sure if anyone other than Simon is using c++, but anyway...
+
+I've just checked in some changes to the c++ libraries in berlios, along
+with the tap++.mk makefile which allow you to compile c++ libraries and
+taps with the -frepo option enabled. The upshot of this is that you get
+one copy of each template instantiation globally rather than one per
+object file, meaning any template vtables are global rather than local
+variables and can be fixed up by the normal mechanism. It also might
+mean that c++ compiled code is a bit smaller.
+
+Unfortunately you need to apply the patch I've put at the end of this
+mail to the compiler to get -frepo to work in any meaningful manner, so
+the use of this option is currently disabled by default. If you apply
+the patch then you can enable it by uncommenting the line USE_FREPO=1 in
+tap++.mk. Even with the patch -frepo is somewhat broken - the makefile
+has to repeatedly try to link the code to get the templates to be
+instantiated. (Each time it brings in the template functions that it
+noticed were missing last time, but they might need other template
+functions, so round it goes again until it works). All this is handled
+automatically via the prelink.elf stage for taps, but you'd need to make
+any libraries depend on $(TEMPLATESBUILTFLAG) - see how libc++utils.a
+and libframework.a do it.
+
+Robin
+
+
+
+Patch (taken from <A HREF="http://gcc.gnu.org/ml/gcc-patches/2000-07/msg00159.html">http://gcc.gnu.org/ml/gcc-patches/2000-07/msg00159.html</A>)
+
+--- gcc/tlink.c    Tue Oct 12 08:39:14 1999
++++ gcc/tlink.c    Thu Jul  6 02:22:53 2000
+@@ -27,6 +27,7 @@
+#include &quot;demangle.h&quot;
+#include &quot;toplev.h&quot;
+#include &quot;collect2.h&quot;
++#include &quot;string.h&quot;
+
+#define MAX_ITERATIONS 17
+
+@@ -639,6 +640,13 @@
+      demangled *dem = 0;
+      q = 0;
+
++      if ( strncmp(oldq, &quot;In function &quot;, sizeof(&quot;In function &quot;)-1) == 0
+) {
++        sym=0;
++        if (tlink_verbose &gt;= 2)
++          fprintf (stderr, &quot;scan_linker_output: skipped: %s\n&quot;,oldq);
++      }
++      else {
++
+      /* First try \`GNU style'.  */
+      p = index (oldq, '\`');
+      if (p)
+@@ -660,6 +668,9 @@
+          sym = symbol_hash_lookup (p, false);
+        }
+        }
++
++      }
++
+    }
+
+      if (sym &amp;&amp; sym-&gt;tweaked)
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000056.html">[TAP-devel] Initialisation of pointers in global variables
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#57">[ date ]</a>
+              <a href="thread.html#57">[ thread ]</a>
+              <a href="subject.html#57">[ subject ]</a>
+              <a href="author.html#57">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/tap-devel">More information about the TAP-devel
+mailing list</a><br>
+</body></html>

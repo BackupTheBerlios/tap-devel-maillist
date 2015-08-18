@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [TAP-devel] C++ - fixing v-table problems
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/tap-devel/2005-December/index.html" >
+   <LINK REL="made" HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20C%2B%2B%20-%20fixing%20v-table%20problems&In-Reply-To=%3C43960DFE.4030301%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000032.html">
+   <LINK REL="Next"  HREF="000034.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[TAP-devel] C++ - fixing v-table problems</H1>
+    <B>Simon Capewell</B> 
+    <A HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20C%2B%2B%20-%20fixing%20v-table%20problems&In-Reply-To=%3C43960DFE.4030301%40gmail.com%3E"
+       TITLE="[TAP-devel] C++ - fixing v-table problems">simon.capewell at gmail.com
+       </A><BR>
+    <I>Tue Dec  6 23:17:34 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000032.html">[TAP-devel] C++ - fixing v-table problems
+</A></li>
+        <LI>Next message: <A HREF="000034.html">[TAP-devel] File releases
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#33">[ date ]</a>
+              <a href="thread.html#33">[ thread ]</a>
+              <a href="subject.html#33">[ subject ]</a>
+              <a href="author.html#33">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>What's stopping you then? ;-)
+
+Anyone got any thoughts on what a C++ framework might contain apart from 
+the obvious
+
+class Tapplication
+{
+virtual dword OnIdle();
+virtual dword OnKey(dword key, dword hardwareKey);
+virtual dword On...
+};
+
+and
+class MessageBox
+{
+Show(const char* message);
+};
+
+
+
+
+Robin Glover wrote:
+&gt;<i> Just for the record you can create a version of libtap.a with the broken
+</I>&gt;<i> __builtin_new removed fairly easily - extract init.o from libtap.a, use
+</I>&gt;<i> mips-objcopy -N __builtin_new init.o newinit.o to create a copy of the
+</I>&gt;<i> object file with the offending symbol removed, rename back and re-create
+</I>&gt;<i> the archive (not forgetting to ranlib).
+</I>&gt;<i> 
+</I>&gt;<i> It's then possible to define a set of global new/delete operators which
+</I>&gt;<i> work rather than having to define them on a class-by-class basis. You
+</I>&gt;<i> could even put a .o with them in into libtap.o, I suppose.
+</I>&gt;<i> 
+</I>&gt;<i> I think that pretty much means that the basic c++ features can be made
+</I>&gt;<i> to work - no idea whether things like multiple/virtual inheritance work
+</I>&gt;<i> yet, or pointers to member functions, but mostly you can get away
+</I>&gt;<i> without needing that sort of stuff. It's certainly better than C (he
+</I>&gt;<i> says  :-)  ). One last note is that constructors of static or global
+</I>&gt;<i> objects do not get called at tap startup (and destructors presumably
+</I>&gt;<i> don't get called at exit either).
+</I>&gt;<i> 
+</I>&gt;<i> Robin
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000032.html">[TAP-devel] C++ - fixing v-table problems
+</A></li>
+	<LI>Next message: <A HREF="000034.html">[TAP-devel] File releases
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#33">[ date ]</a>
+              <a href="thread.html#33">[ thread ]</a>
+              <a href="subject.html#33">[ subject ]</a>
+              <a href="author.html#33">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/tap-devel">More information about the TAP-devel
+mailing list</a><br>
+</body></html>

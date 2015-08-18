@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [TAP-devel] Build errors in toolchain
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/tap-devel/2006-March/index.html" >
+   <LINK REL="made" HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Build%20errors%20in%20toolchain&In-Reply-To=%3C200603162353.25940.markb%40users.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000059.html">
+   <LINK REL="Next"  HREF="000061.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[TAP-devel] Build errors in toolchain</H1>
+    <B>Mark Blakeney</B> 
+    <A HREF="mailto:tap-devel%40lists.berlios.de?Subject=Re%3A%20%5BTAP-devel%5D%20Build%20errors%20in%20toolchain&In-Reply-To=%3C200603162353.25940.markb%40users.berlios.de%3E"
+       TITLE="[TAP-devel] Build errors in toolchain">markb at berlios.de
+       </A><BR>
+    <I>Thu Mar 16 14:53:25 CET 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000059.html">[TAP-devel] Build errors in toolchain
+</A></li>
+        <LI>Next message: <A HREF="000061.html">[TAP-devel] Build errors in toolchain
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#60">[ date ]</a>
+              <a href="thread.html#60">[ thread ]</a>
+              <a href="subject.html#60">[ subject ]</a>
+              <a href="author.html#60">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Thursday 16 March 2006 18:10, you wrote:
+&gt;<i> didn't see this sort of problem when I built the toolchain for c++,
+</I>&gt;<i> but mine is on Cygwin. I'm a bit suspicious that you've got a mixup
+</I>&gt;<i> going on with your native toolchain (in /usr/bin) being used to
+</I>&gt;<i> compile for MIPS, when actually your newly built tap toolchain should
+</I>&gt;<i> be doing that. I presume you're running debian on x86, so I'm not
+</I>&gt;<i> surprised that /usr/bin/ld can't cope with elf32-bigmips.
+</I>
+You mean a self-inflicted mixup? I just download the toolchain and type
+make don't I? I haven't changed anything. The problem will likely be an
+environment issue between my recent Debian (x86) and what the toolchain
+expects and certainly cygwin will be quite different (in versions at
+least) to my environment.
+
+&gt;<i> Try building one of the test taps from berlios and see if your
+</I>&gt;<i> toolchain is actually OK. The binaries should have been built to
+</I>&gt;<i> /usr/local/topfield-gcc.
+</I>
+I already did some successfully so (I think?) my toolchain will build
+all taps ok. However, I was looking for complete confidence by seeing
+the toolchain make complete properly and the formal tap tests succeed. I
+guess I will give up on this but a bug in the toolchain build does
+exist.
+
+BTW, regarding the svn tree. The make only succeeds for 8 of the 12 taps
+and only libutils amongst the 6 libs. However, the errors are mostly due
+to mistakes in the Makefiles, filename case errors, dos file names (e.g.
+include .\tapstring), missing files, and plenty of other errors I can't
+determine. Most of the source files have very odd line terminations (not
+just a unix/dos issue), e.g. CRLF + LF (but not consistently in the same
+file?). Do nearly all of the contributors here work on Windows and what
+editors are they using? There are also directories in the libs area with
+plenty of source files but no explanation of what the lib does or how to
+build or use it.
+
+Please don't take this comment harshly because this facility is a good
+idea and has great potential. Clearly a number of people have gone to
+enormous effort to set up and contribute to this community effort. These
+(minor?) issues do make it onerous for a newbie however.
+
+-- 
+Mark Blakeney.
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000059.html">[TAP-devel] Build errors in toolchain
+</A></li>
+	<LI>Next message: <A HREF="000061.html">[TAP-devel] Build errors in toolchain
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#60">[ date ]</a>
+              <a href="thread.html#60">[ thread ]</a>
+              <a href="subject.html#60">[ subject ]</a>
+              <a href="author.html#60">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/tap-devel">More information about the TAP-devel
+mailing list</a><br>
+</body></html>

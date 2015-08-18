@@ -1,0 +1,70 @@
+From raichea at yahoo.com  Sat Jun  3 18:11:48 2006
+From: raichea at yahoo.com (Rai Chea)
+Date: Sat, 3 Jun 2006 09:11:48 -0700 (PDT)
+Subject: [TAP-devel] Linking problem
+Message-ID: <20060603161148.19827.qmail@web35404.mail.mud.yahoo.com>
+
+Have successfully installed the Cygwin environment and can compile some of the sample apps - the ones that are effectively a single *.c file (maybe many but all #included into a single file). (BTW, some of the UK project apps have build errors, but I assume this is known).
+  
+To test linking, I'm trying to compile the Topfield fireclock. I've modified the skeleton Makefile but for some reason the linker is not being invoked. I get fire.o and clock.o created but they do not get linked into an elf, and so the tap isn't created. The relevant entries in the Makefile are: 
+  
+ fclk.elf:: fire.o clock.o  <- does this need ::? I've tried with just : too... 
+ fire.o: fire.c 
+ clock.o: clock.c 
+  
+Some of the taps included with the toolchain do seem to call the linker, but the Makefiles are much more complex. I've dug into the documentation a little, and think I understand what tap.mk does and can't see why the "elf" line above doesn't invoke the linker. 
+  
+ Can anyone suggest what might be the problem? 
+  
+ Thanks, Steve.
+
+
+
+From tapdev at bruceheather.co.uk  Wed Jun 14 01:01:52 2006
+From: tapdev at bruceheather.co.uk (tapdev at bruceheather.co.uk)
+Date: Wed, 14 Jun 2006 00:01:52 +0100
+Subject: [TAP-devel] C++ Toolchain
+Message-ID: <000001c68f3d$5c4d61b0$0527a8c0@bambi>
+
+Hi Everyone,
+ 
+I've recently been trying to build the C++ toolchain under Cygwin but always
+get the same pattern of errors. The first and subsequence calls to Make give
+this:
+ 
+make[5]: Entering directory
+`/home/Bruce/trunk/tools/toolchain/build-newlib/mips/soft-float/newlib'
+make[5]: *** No rule to make target `all'.  Stop.
+make[5]: Leaving directory
+`/home/Bruce/trunk/tools/toolchain/build-newlib/mips/soft-float/newlib'
+make[4]: *** [multi-do] Error 1
+
+but if I then pipe the output to a file: make > out.txt it passes this error
+but fails in build-gcc like this:
+ 
+creating Makefile host.
+*** Can only configure for one host and one target at a time.
+Usage: configure [OPTIONS] [HOST]
+ 
+and if you run again without the redirection it fails with this:
+ 
+make[4]: Entering directory
+`/home/Bruce/trunk/tools/toolchain/build-gcc/mips/soft-float/libiberty'
+make[4]: *** No rule to make target `all'.  Stop.
+make[4]: Leaving directory
+`/home/Bruce/trunk/tools/toolchain/build-gcc/mips/soft-float/libiberty'
+make[3]: *** [multi-do] Error 1
+
+I've searched this archive and tried to trace the error but no joy.  Has
+anyone seen this before?  If you have can you offer any advice?
+ 
+Failing this, does anyone have a link for a prebuilt C++ toolchain?
+ 
+Many Thx for any advice
+ 
+Bruce
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/tap-devel/attachments/20060614/9d7d7ff5/attachment.html>
+
